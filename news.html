@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国内新闻聚合</title>
+<style>
+  :root {
+    --bg:#090d14; --bg2:#0d1420; --surface:#111926; --surface2:#162131; --text:#e7edf7;
+    --muted:#9aa7b8; --soft:#667386; --primary:#e4494f; --primary2:#ff6b35; --gold:#f6c760;
+    --cyan:#66d9ef; --green:#7dd3a8; --border:#263448; --border2:#33455d;
+    --shadow:0 18px 48px rgba(0,0,0,.34); --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { color-scheme:dark; }
+  body {
+    min-width:320px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(circle at 18% -10%, rgba(228,73,79,.22), transparent 34%),
+      radial-gradient(circle at 82% 0%, rgba(102,217,239,.12), transparent 28%),
+      linear-gradient(180deg,#0d1420 0%,#090d14 42%,#070a10 100%);
+    color:var(--text); line-height:1.6;
+  }
+  button,input,select { font:inherit; }
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid rgba(246,199,96,.48); outline-offset:2px; }
+  .topbar {
+    color:var(--text); border-bottom:1px solid rgba(246,199,96,.22);
+    background:linear-gradient(135deg,rgba(17,25,38,.92),rgba(12,18,29,.72) 55%,rgba(74,20,28,.62));
+    box-shadow:0 18px 48px rgba(0,0,0,.28);
+  }
+  .topbar-inner { max-width:1240px; margin:0 auto; padding:30px 18px 24px; display:flex; justify-content:space-between; gap:18px; align-items:center; }
+  .brand { min-width:0; }
+  .eyebrow { font-size:.78rem; color:var(--cyan); letter-spacing:.12em; text-transform:uppercase; font-weight:800; }
+  h1 { margin-top:5px; font-size:clamp(1.55rem,3vw,2.45rem); line-height:1.12; letter-spacing:0; }
+  .topbar p { margin-top:9px; color:var(--muted); }
+  .meta-card { flex:0 0 auto; min-width:210px; text-align:right; border:1px solid rgba(102,217,239,.18); border-radius:16px; background:rgba(9,13,20,.5); padding:13px 15px; box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+  .meta-card strong { display:block; color:var(--gold); font-size:1.9rem; line-height:1; font-variant-numeric:tabular-nums; }
+  .container { max-width:1240px; margin:0 auto; padding:18px 14px 40px; }
+  .source-overview { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:14px; }
+  .source-chip {
+    min-height:58px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
+    background:linear-gradient(180deg,rgba(22,33,49,.96),rgba(15,23,36,.96)); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:0 8px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .source-chip span { color:var(--muted); font-size:.82rem; line-height:1.3; }
+  .source-chip strong { color:var(--gold); font-size:1.25rem; font-variant-numeric:tabular-nums; }
+  .toolbar {
+    position:sticky; top:0; z-index:20; display:grid; grid-template-columns:minmax(230px,1fr) auto; gap:12px;
+    padding:12px; margin-bottom:12px; background:rgba(13,20,32,.94); border:1px solid var(--border2);
+    border-radius:16px; box-shadow:var(--shadow); backdrop-filter:blur(14px);
+  }
+  .filters,.actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .search-wrap { position:relative; flex:1 1 260px; min-width:220px; }
+  .search-wrap span { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--soft); }
+  .search-input,.select {
+    min-height:44px; border:1px solid var(--border2); border-radius:10px; background:#0b111b;
+    padding:0 12px; color:var(--text); box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .search-input::placeholder { color:#5c6878; }
+  .search-input { width:100%; padding-left:36px; }
+  .select { min-width:160px; }
+  .segment { display:flex; gap:3px; min-height:44px; padding:3px; border-radius:12px; border:1px solid var(--border); background:#0b111b; overflow:auto; }
+  .seg-btn { border:0; border-radius:9px; background:transparent; color:var(--muted); cursor:pointer; padding:0 10px; font-weight:700; white-space:nowrap; }
+  .seg-btn span { margin-left:5px; color:var(--soft); font-size:.75rem; }
+  .seg-btn.active { background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; }
+  .seg-btn.active span { color:#fff; opacity:.8; }
+  .btn { min-height:44px; border:1px solid var(--border2); border-radius:10px; background:#111926; color:var(--muted); padding:0 14px; cursor:pointer; font-weight:700; }
+  .btn:hover { color:var(--text); border-color:#4c6280; }
+  .btn.primary { background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; border-color:transparent; box-shadow:0 10px 24px rgba(228,73,79,.18); }
+  .result-line { margin:0 3px 12px; color:var(--muted); font-size:.9rem; }
+  .result-line strong { color:var(--gold); }
+  .news-list { display:grid; gap:10px; }
+  .news-item {
+    position:relative; display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px; align-items:center;
+    padding:12px 14px 12px 4px; border:1px solid var(--border); border-radius:var(--radius);
+    background:linear-gradient(180deg,rgba(17,25,38,.98),rgba(13,20,32,.98)); box-shadow:0 8px 22px rgba(0,0,0,.22);
+  }
+  .news-item::before { content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:0 3px 3px 0; background:#314158; }
+  .news-item.hidden { display:none; }
+  .news-item.is-new::before { background:linear-gradient(180deg,var(--primary),var(--primary2)); box-shadow:0 0 16px rgba(255,107,53,.32); }
+  .news-item.is-read .news-title { color:#8794a6; }
+  .news-item.is-read .news-main p { color:#687386; }
+  .news-item.is-favorite { border-color:rgba(246,199,96,.46); background:linear-gradient(90deg,rgba(246,199,96,.08),rgba(17,25,38,.98) 34%); }
+  .icon-btn { width:44px; height:44px; display:grid; place-items:center; border:0; background:transparent; cursor:pointer; color:var(--soft); }
+  .icon-btn svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; }
+  .news-item.is-favorite .favorite-btn { color:var(--gold); }
+  .news-item.is-favorite .favorite-btn svg { fill:currentColor; }
+  .news-main { min-width:0; }
+  .news-meta { display:flex; flex-wrap:wrap; gap:7px; color:var(--soft); font-size:.76rem; }
+  .news-meta span,.news-meta time { display:inline-flex; align-items:center; min-height:20px; padding:0 7px; border-radius:999px; background:#0b111b; border:1px solid rgba(51,69,93,.7); }
+  .news-title { display:block; margin-top:5px; color:var(--text); text-decoration:none; font-weight:760; font-size:1rem; line-height:1.45; }
+  .news-title:hover { color:var(--cyan); }
+  .news-main p { margin-top:4px; color:var(--muted); font-size:.86rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+  .tag { display:inline-flex; min-height:22px; align-items:center; border-radius:999px; padding:0 8px; background:#0b111b; border:1px solid var(--border); color:var(--muted); font-size:.72rem; font-weight:700; }
+  .tag.hot { background:rgba(228,73,79,.12); border-color:rgba(228,73,79,.34); color:#ff9a8a; }
+  .state-badge { min-height:30px; border:1px solid var(--border2); border-radius:999px; padding:0 10px; background:#0b111b; color:var(--cyan); cursor:pointer; font-weight:700; white-space:nowrap; }
+  .news-item.is-read .state-badge { color:#7e8a9b; background:#0d1420; }
+  .empty-results { display:none; text-align:center; padding:38px 16px; color:var(--muted); border:1px dashed var(--border2); border-radius:var(--radius); background:rgba(17,25,38,.7); }
+  .empty-results.show { display:block; }
+  .error-panel { margin-bottom:14px; padding:14px; border:1px solid rgba(228,73,79,.36); border-radius:var(--radius); background:rgba(228,73,79,.08); }
+  .error-panel h2 { font-size:.95rem; color:#ff9a8a; margin-bottom:8px; }
+  .source-error { display:grid; gap:2px; color:var(--muted); font-size:.82rem; }
+  .source-error + .source-error { margin-top:8px; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:999; opacity:0; pointer-events:none; background:#e7edf7; color:#0b111b; padding:11px 20px; border-radius:12px; transition:opacity .2s, transform .2s; box-shadow:0 16px 36px rgba(0,0,0,.35); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
+  footer { text-align:center; padding:22px 0 8px; color:var(--soft); font-size:.78rem; }
+  @media (max-width:760px) {
+    .topbar-inner { align-items:flex-start; padding:24px 14px 20px; }
+    .meta-card { display:none; }
+    .toolbar { grid-template-columns:1fr; }
+    .search-wrap,.select,.btn { flex:1 1 100%; min-width:0; }
+    .news-item { grid-template-columns:40px minmax(0,1fr); }
+    .state-badge { grid-column:2; justify-self:start; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="eyebrow">Domestic News Monitor</div>
+      <h1>国内新闻聚合</h1>
+      <p>新华社/新华网、央视网、中国新闻网、微博热搜聚合。更新于 <span id="updateTime">2026-06-05 14:49:57</span></p>
+    </div>
+    <div class="meta-card"><strong>140</strong><span>条新闻</span></div>
+  </div>
+</header>
+<main class="container">
+  <section class="source-overview"><div class="source-chip"><span>中国新闻网 · 国际</span><strong>17</strong></div><div class="source-chip"><span>中国新闻网 · 时政</span><strong>17</strong></div><div class="source-chip"><span>中国新闻网 · 社会</span><strong>17</strong></div><div class="source-chip"><span>中国新闻网 · 财经</span><strong>17</strong></div><div class="source-chip"><span>央视网新闻</span><strong>6</strong></div><div class="source-chip"><span>央视网新闻 · 中国</span><strong>1</strong></div><div class="source-chip"><span>央视网新闻 · 国内</span><strong>17</strong></div><div class="source-chip"><span>微博热搜</span><strong>16</strong></div><div class="source-chip"><span>新华网 · 时政</span><strong>16</strong></div><div class="source-chip"><span>新华网 · 要闻</span><strong>16</strong></div></section>
+  <section class="toolbar">
+    <div class="filters">
+      <label class="search-wrap"><span>⌕</span><input class="search-input" id="searchInput" type="search" placeholder="搜索标题、摘要、来源"></label>
+      <select class="select" id="sourceFilter"><option value="all">全部来源</option><option value="中国新闻网 · 国际">中国新闻网 · 国际</option><option value="中国新闻网 · 时政">中国新闻网 · 时政</option><option value="中国新闻网 · 社会">中国新闻网 · 社会</option><option value="中国新闻网 · 财经">中国新闻网 · 财经</option><option value="央视网新闻">央视网新闻</option><option value="央视网新闻 · 中国">央视网新闻 · 中国</option><option value="央视网新闻 · 国内">央视网新闻 · 国内</option><option value="微博热搜">微博热搜</option><option value="新华网 · 时政">新华网 · 时政</option><option value="新华网 · 要闻">新华网 · 要闻</option></select>
+      <select class="select" id="stateFilter">
+        <option value="all">全部状态</option>
+        <option value="new">新内容</option>
+        <option value="favorite">收藏</option>
+        <option value="unread">未读</option>
+      </select>
+    </div>
+    <div class="actions">
+      <div class="segment" id="categoryFilter"><button class="seg-btn active" type="button" data-category="全部">全部<span>140</span></button><button class="seg-btn" type="button" data-category="主线">主线<span>34</span></button><button class="seg-btn" type="button" data-category="会议">会议<span>7</span></button><button class="seg-btn" type="button" data-category="政策">政策<span>21</span></button><button class="seg-btn" type="button" data-category="国内">国内<span>15</span></button><button class="seg-btn" type="button" data-category="社会">社会<span>17</span></button><button class="seg-btn" type="button" data-category="财经">财经<span>16</span></button><button class="seg-btn" type="button" data-category="国际">国际<span>10</span></button><button class="seg-btn" type="button" data-category="视频">视频<span>4</span></button><button class="seg-btn" type="button" data-category="热搜">热搜<span>16</span></button></div>
+      <button class="btn" type="button" onclick="markAllRead()">全部已读</button>
+      <button class="btn primary" type="button" onclick="doRefresh()">刷新抓取</button>
+    </div>
+  </section>
+  <div class="result-line" id="resultLine">当前显示 <strong>140</strong> 条新闻</div>
+  <div class="empty-results" id="emptyResults">没有匹配的新闻。</div>
+  
+  <section class="news-list">
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634701.shtml" data-title="生态环境部发布《2025中国生态环境状况公报》" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:41</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634701.shtml" target="_blank" rel="noopener">生态环境部发布《2025中国生态环境状况公报》</a>
+                <p>中新网6月5日电 据生态环境部微信公众号消息，2026年6月5日，生态环境部正式发布《2025中国生态环境状况公报》。2025年，全国生态环境质量持续改善，环境安全形势保持稳定。“十四五”期间，主要污染物排放总量持续下降，生态环境保持改善态势、向好趋势。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634760.shtml" data-title="瑞梅铁路梅江特大桥中跨顺利合龙" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:35</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634760.shtml" target="_blank" rel="noopener">瑞梅铁路梅江特大桥中跨顺利合龙</a>
+                <p>中新网广州6月5日电 (记者 郭军)6月5日凌晨，随着最后一方混凝土精准入模、振捣密实，由中国铁路广州局集团深圳工程建设指挥部负责建设、中铁十五局集团承建施工的瑞梅铁路梅江特大桥中跨顺利合龙，标志着大桥建设正式进入附属工程阶段，为瑞梅铁路全线如期建成通车筑牢关键根基。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634764.shtml" data-title="广州发布新版国有土地上房屋征收与补偿实施办法" data-source="中国新闻网 · 财经" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:36</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634764.shtml" target="_blank" rel="noopener">广州发布新版国有土地上房屋征收与补偿实施办法</a>
+                <p>中新网广州6月5日电 (记者 许青青)据广州市住房和城乡建设局5日介绍，广州市人民政府办公厅近日正式印发《广州市国有土地上房屋征收与补偿实施办法》(下称“新版《办法》”)，围绕征收决定、征收补偿、征收实施等作出全面规范，直击民生关切、破解实操难点，兼顾民众切身利益与城市发展，推…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634755.shtml" data-title="日本实际家庭消费连续5个月同比下滑" data-source="中国新闻网 · 国际" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:20</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634755.shtml" target="_blank" rel="noopener">日本实际家庭消费连续5个月同比下滑</a>
+                <p>日本总务省5日公布的调查结果显示，受中东局势延宕影响，日本家庭消费持续承压，4月实际家庭消费支出连续第5个月同比下滑。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/108369.shtml" data-title="[永蔚独家访问]贾春旺揭示腐败案发新特点" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 22:22</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/108369.shtml" target="_blank" rel="noopener">[永蔚独家访问]贾春旺揭示腐败案发新特点</a>
+                <p>&lt;P&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CCTV.com消息（中国新闻）：&lt;/P&gt;&lt;P align=center&gt;&lt;TABLE align=center border=0 To1ForShow&gt;&lt;TBODY&gt;&lt;TR&gt;&lt;TD&gt;&lt;IMG src=&quot;http://new…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://www.news.cn/comments/20220728/b8859a78ad1743aeba8fdeadff3651bb/c.html" data-title="今日主角 | “敬二舅”刷屏：平凡之光，大有力量" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>今日主角 | “敬二舅”刷屏：平凡之光，</time>
+                </div>
+                <a class="news-title" href="http://www.news.cn/comments/20220728/b8859a78ad1743aeba8fdeadff3651bb/c.html" target="_blank" rel="noopener">今日主角 | “敬二舅”刷屏：平凡之光，大有力量</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://french.news.cn/index.htm" data-title="Français" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>English Español Fran</time>
+                </div>
+                <a class="news-title" href="https://french.news.cn/index.htm" target="_blank" rel="noopener">Français</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://news.cctv.com/2026/06/05/ARTI5oTXOA1PDErcFqCIv0In260605.shtml" data-title="“三北”工程书写人与自然和谐共生新图景" data-source="央视网新闻 · 中国" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 中国</span>
+                    <span>国内</span>
+                    <time>“三北”工程书写人与自然和谐共生新图景</time>
+                </div>
+                <a class="news-title" href="https://news.cctv.com/2026/06/05/ARTI5oTXOA1PDErcFqCIv0In260605.shtml" target="_blank" rel="noopener">“三北”工程书写人与自然和谐共生新图景</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://jingji.cctv.com/2026/06/05/ARTIkV70CV2qie3uZ2wfYfFo260605.shtml?spm=C96370.PPDB2vhvSivD.ERPyWJCsPwT9.14" data-title="透过5月份中国大宗商品价格指数看经济发展向稳向好" data-source="央视网新闻" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>财经</span>
+                    <time>透过5月份中国大宗商品价格指数看经济发展</time>
+                </div>
+                <a class="news-title" href="https://jingji.cctv.com/2026/06/05/ARTIkV70CV2qie3uZ2wfYfFo260605.shtml?spm=C96370.PPDB2vhvSivD.ERPyWJCsPwT9.14" target="_blank" rel="noopener">透过5月份中国大宗商品价格指数看经济发展向稳向好</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=豆包首次付费后月活减少610万" data-title="1. 豆包首次付费后月活减少610万" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=豆包首次付费后月活减少610万" target="_blank" rel="noopener">1. 豆包首次付费后月活减少610万</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 115万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634734.shtml" data-title="报告称中国发展全过程人民民主，加强人权法治保障" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:28</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634734.shtml" target="_blank" rel="noopener">报告称中国发展全过程人民民主，加强人权法治保障</a>
+                <p>中新网6月5日电 据中国人权网消息，中国人权研究会、国家人权教育与培训基地5日联合发布《〈国家人权行动计划(2021－2025年)〉实施评估报告》。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634759.shtml" data-title="从“风沙黄”到“生态绿”：山西保德黄河畔的绿色蝶变" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:35</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634759.shtml" target="_blank" rel="noopener">从“风沙黄”到“生态绿”：山西保德黄河畔的绿色蝶变</a>
+                <p>中新网忻州6月5日电 题：从“风沙黄”到“生态绿”：山西保德黄河畔的绿色蝶变</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634766.shtml" data-title="招聘需求暴涨！“AI圈最火岗位”，到底是干嘛的？" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:36</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634766.shtml" target="_blank" rel="noopener">招聘需求暴涨！“AI圈最火岗位”，到底是干嘛的？</a>
+                <p>年薪百万，招聘需求涨42倍！“AI圈最火岗位”，到底是干嘛的？</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634720.shtml" data-title="“你好！中国”旅游推介会在韩国首尔举行" data-source="中国新闻网 · 国际" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>财经</span>
+                    <time>2026-06-05 13:59</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634720.shtml" target="_blank" rel="noopener">“你好！中国”旅游推介会在韩国首尔举行</a>
+                <p>中新网首尔6月5日电 (记者 金旭)当地时间6月4日，在中国驻韩国使馆指导下，山东省、安徽省、海南省、江苏省无锡市以及中外文化和旅游交流中心在韩国首尔共同主办“你好！中国”旅游推介会，吸引韩国近百家旅游企业参加。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/108219.shtml" data-title="中国一年多来审结宣判黑社会性质组织案125件" data-source="央视网新闻 · 国内" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>社会</span>
+                    <time>2007-03-15 22:14</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/108219.shtml" target="_blank" rel="noopener">中国一年多来审结宣判黑社会性质组织案125件</a>
+                <p>新华网北京３月１５日电（田雨 李谦锋）中国打黑除恶专项斗争开展一年多来，已打掉一批黑恶犯罪团伙。其中，检察机关以涉嫌黑社会性质组织犯罪提起公诉２４６件；人民法院审结宣判黑社会性质组织案１２５件，判决生效６０件。 ……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://www.xinhuanet.com/comments/20220604/1f747dd82f284b56849e5d5302d84f22/c.html" data-title="如何理解文化自信的这一根本性意义？" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>如何理解文化自信的这一根本性意义？</time>
+                </div>
+                <a class="news-title" href="http://www.xinhuanet.com/comments/20220604/1f747dd82f284b56849e5d5302d84f22/c.html" target="_blank" rel="noopener">如何理解文化自信的这一根本性意义？</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://russian.news.cn/index.htm" data-title="Русский язык" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>English Español Fran</time>
+                </div>
+                <a class="news-title" href="https://russian.news.cn/index.htm" target="_blank" rel="noopener">Русский язык</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://news.cctv.com/2026/06/05/ARTI2tKHTPIvNpLWlyzzYL6Y260605.shtml?spm=C96370.PPDB2vhvSivD.ERPyWJCsPwT9.15" data-title="各麦收省份加强机具调度护航 智能化设备助力颗粒归仓" data-source="央视网新闻" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>国内</span>
+                    <time>各麦收省份加强机具调度护航 智能化设备助</time>
+                </div>
+                <a class="news-title" href="https://news.cctv.com/2026/06/05/ARTI2tKHTPIvNpLWlyzzYL6Y260605.shtml?spm=C96370.PPDB2vhvSivD.ERPyWJCsPwT9.15" target="_blank" rel="noopener">各麦收省份加强机具调度护航 智能化设备助力颗粒归仓</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=中餐厅收工合照" data-title="2. 中餐厅收工合照" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=中餐厅收工合照" target="_blank" rel="noopener">2. 中餐厅收工合照</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 85万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634744.shtml" data-title="美食融合两岸风味受捧 台青在武汉创业有成" data-source="中国新闻网 · 时政" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>国内</span>
+                    <time>2026-06-05 14:16</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634744.shtml" target="_blank" rel="noopener">美食融合两岸风味受捧 台青在武汉创业有成</a>
+                <p>中新社武汉6月5日电 题：美食融合两岸风味受捧 台青在武汉创业有成</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634758.shtml" data-title="探访黑龙江宝清翡翠湖：昔日“废弃矿山”如今“绿水青山”" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:34</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634758.shtml" target="_blank" rel="noopener">探访黑龙江宝清翡翠湖：昔日“废弃矿山”如今“绿水青山”</a>
+                <p>中新网双鸭山6月5日电 题：探访黑龙江宝清翡翠湖：昔日“废弃矿山”如今“绿水青山”</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634746.shtml" data-title="海关远程视频核查改革落地山西" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:18</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634746.shtml" target="_blank" rel="noopener">海关远程视频核查改革落地山西</a>
+                <p>中新网太原6月5日电 (杨静 谭国军)记者5日从太原海关获悉，太原海关所属晋阳海关运用远程视频核查模式，完成对山西三晋碳素股份有限公司的核查工作，标志着该项海关智慧监管便利化举措在山西首次落地应用，惠及本地广大外贸企业。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634699.shtml" data-title="尼日利亚一校园7名学生遭绑架 1人成功逃脱" data-source="中国新闻网 · 国际" data-category="视频">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>视频</span>
+                    <time>2026-06-05 13:59</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634699.shtml" target="_blank" rel="noopener">尼日利亚一校园7名学生遭绑架 1人成功逃脱</a>
+                <p>中新社北京6月5日电 阿布贾消息：尼日利亚国家电视台当地时间4日报道，该国西北部的联邦理工学院7名学生遭一伙武装人员绑架，一名学生后成功逃脱。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/108105.shtml" data-title="中国宗教界和平委员会二届四次会议在京召开" data-source="央视网新闻 · 国内" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>会议</span>
+                    <time>2007-03-15 22:02</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/108105.shtml" target="_blank" rel="noopener">中国宗教界和平委员会二届四次会议在京召开</a>
+                <p>新华网北京3月15日电 “我有一个梦想，愿我国五大宗教与世界各国宗教界彼此尊重，共同努力，携手为世界和平事业作出更大贡献。”中国宗教界和平委员会（以下简称“中宗和”）第二届委员会第四次全体会议今日在北京召开。全国政协副主席、“中宗和”主席丁光训在会上如是说。 ……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://www.news.cn/comments/20220507/633c2f34e0744bddac65f88387f168f8/c.html" data-title="新时代中国发展进步的成功之道" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>新时代中国发展进步的成功之道</time>
+                </div>
+                <a class="news-title" href="http://www.news.cn/comments/20220507/633c2f34e0744bddac65f88387f168f8/c.html" target="_blank" rel="noopener">新时代中国发展进步的成功之道</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://portuguese.news.cn/index.htm" data-title="Português" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>English Español Fran</time>
+                </div>
+                <a class="news-title" href="https://portuguese.news.cn/index.htm" target="_blank" rel="noopener">Português</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://news.cctv.com/2026/06/05/ARTIa8OmmP2ZISW1YlcrvrMa260605.shtml" data-title="世界环境日｜我国五大流域同步开展鱼类增殖放流" data-source="央视网新闻" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>国内</span>
+                    <time>世界环境日｜我国五大流域同步开展鱼类增殖</time>
+                </div>
+                <a class="news-title" href="https://news.cctv.com/2026/06/05/ARTIa8OmmP2ZISW1YlcrvrMa260605.shtml" target="_blank" rel="noopener">世界环境日｜我国五大流域同步开展鱼类增殖放流</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=网警侦破涉2026高考诈骗案" data-title="3. 网警侦破涉2026高考诈骗案" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=网警侦破涉2026高考诈骗案" target="_blank" rel="noopener">3. 网警侦破涉2026高考诈骗案</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 75万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634754.shtml" data-title="学习时节｜“我们要像保护自己的眼睛一样保护生态环境”" data-source="中国新闻网 · 时政" data-category="视频">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>视频</span>
+                    <time>2026-06-05 14:13</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634754.shtml" target="_blank" rel="noopener">学习时节｜“我们要像保护自己的眼睛一样保护生态环境”</a>
+                <p>视频：学习时节｜“我们要像保护自己的眼睛一样保护生态环境”来源：南方网·粤学习</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634761.shtml" data-title="（经济观察）中国正谋划实施新一轮空气质量改善行动" data-source="中国新闻网 · 社会" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:33</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634761.shtml" target="_blank" rel="noopener">（经济观察）中国正谋划实施新一轮空气质量改善行动</a>
+                <p>中新社广州6月5日电 (记者 阮煜琳)中国实施国家级清洁空气行动以来，空气质量发生历史性变化。当前，中国正以新修订出台的环境空气质量标准为引领，谋划实施新一轮空气质量改善行动。“十五五”时期，中国将促进空气质量的全面改善。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634726.shtml" data-title="电车今年起已交部分“建路税”，交养路费需关注三大税种" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:14</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634726.shtml" target="_blank" rel="noopener">电车今年起已交部分“建路税”，交养路费需关注三大税种</a>
+                <p>电动汽车目前无须缴纳道路养护费。随着近年来地方财政困难、道路养护资金缺口加大，购买新车的人里又有过半选择电车，再叠加电车增重等因素，电动汽车应缴纳道路养护费的呼声渐强。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634698.shtml" data-title="菲律宾5月通胀率回落 仍连三月高于官方目标" data-source="中国新闻网 · 国际" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>政策</span>
+                    <time>2026-06-05 13:59</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634698.shtml" target="_blank" rel="noopener">菲律宾5月通胀率回落 仍连三月高于官方目标</a>
+                <p>中新社马尼拉6月5日电 (记者 张兴龙)菲律宾国家统计局5日发布数据显示，该国5月通胀率为6.8%，较4月回落0.4个百分点，但已连续第三个月高于菲律宾中央银行设定的2%至4%全年通胀目标区间。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107888.shtml" data-title="云南将每年下派万余名党员担任&#x27;农村工作指导员&#x27;" data-source="央视网新闻 · 国内" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>社会</span>
+                    <time>2007-03-15 21:48</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107888.shtml" target="_blank" rel="noopener">云南将每年下派万余名党员担任&#x27;农村工作指导员&#x27;</a>
+                <p>新华网昆明３月１５日电（记者刘娟）从２００７年起，云南将用５年时间，每年轮派１.３５万名中共党员干部，作为“社会主义新农村建设工作指导员”（简称指导员），并以乡镇为单位，组成１３１２支新农村工作队（简称工作队），全力推进社会主义新农村建设。 ……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/zt/swwxlztfbh/index.html" data-title="开局起步“十五五”系列主题新闻发布会" data-source="新华网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>政策</span>
+                    <time>开局起步“十五五”系列主题新闻发布会</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/zt/swwxlztfbh/index.html" target="_blank" rel="noopener">开局起步“十五五”系列主题新闻发布会</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260605/9c5d926737e6439b9b43de973dda59d1/c.html" data-title="回顾7年前历史性访问，感受“中朝一家亲”" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>回顾7年前历史性访问，感受“中朝一家亲”</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260605/9c5d926737e6439b9b43de973dda59d1/c.html" target="_blank" rel="noopener">回顾7年前历史性访问，感受“中朝一家亲”</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://tv.cctv.com/2026/06/05/VIDEJWfWCNioKECal65ttTCj260605.shtml" data-title="旅游旺季出行 特殊需求旅客如何买票" data-source="央视网新闻" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>国内</span>
+                    <time>旅游旺季出行 特殊需求旅客如何买票</time>
+                </div>
+                <a class="news-title" href="https://tv.cctv.com/2026/06/05/VIDEJWfWCNioKECal65ttTCj260605.shtml" target="_blank" rel="noopener">旅游旺季出行 特殊需求旅客如何买票</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=上京东看爸妈防骗直播" data-title="4. 上京东看爸妈防骗直播" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=上京东看爸妈防骗直播" target="_blank" rel="noopener">4. 上京东看爸妈防骗直播</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 75万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634730.shtml" data-title="报告称中国平等保障各类群体权益，促进全体人民共同发展" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:13</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634730.shtml" target="_blank" rel="noopener">报告称中国平等保障各类群体权益，促进全体人民共同发展</a>
+                <p>中新网6月5日电 据中国人权网消息，中国人权研究会、国家人权教育与培训基地5日联合发布《〈国家人权行动计划(2021－2025年)〉实施评估报告》。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634757.shtml" data-title="芒种直击“三夏”一线：“中国小麦第一县”挑灯夜收" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:22</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634757.shtml" target="_blank" rel="noopener">芒种直击“三夏”一线：“中国小麦第一县”挑灯夜收</a>
+                <p>中新网安阳6月5日电 题：芒种直击“三夏”一线：“中国小麦第一县”挑灯夜收</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634733.shtml" data-title="一封寄给董事长的手写信" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:13</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634733.shtml" target="_blank" rel="noopener">一封寄给董事长的手写信</a>
+                <p>5月初的一天，一封厚厚的挂号信，寄到了我爱我家上海公司总部。牛皮纸信封上工工整整地写着地址和收件人。在微信可以秒回、邮件可以群发的今天，这样一封手写信，显得格外郑重。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634650.shtml" data-title="古巴方面回应美国最新对古制裁" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:59</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634650.shtml" target="_blank" rel="noopener">古巴方面回应美国最新对古制裁</a>
+                <p>中新社北京6月5日电 当地时间4日，美国宣布将古巴国家主席迪亚斯-卡内尔及其妻子等多人和多个实体列入制裁名单。古巴方面当日对此予以回应。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107781.shtml" data-title="两会观察：一年一度问总理 网络陈情传达民意" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 21:46</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107781.shtml" target="_blank" rel="noopener">两会观察：一年一度问总理 网络陈情传达民意</a>
+                <p>&lt;P align=center&gt;&lt;TABLE align=center border=0 To1ForShow&gt;&lt;TBODY&gt;&lt;TR&gt;&lt;TD&gt;&lt;IMG src=&quot;http://news.cctv.com/20070315/images/1173966459194_1173966…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/specials.html" data-title="“清清黄河”行进式报道" data-source="新华网 · 时政" data-category="视频">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>视频</span>
+                    <time>“清清黄河”行进式报道</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/specials.html" target="_blank" rel="noopener">“清清黄河”行进式报道</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260604/1fb27fd3dad44e47b5c56af25518b771/c.html" data-title="改善生态环境需“咬定青山不放松”" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>改善生态环境需“咬定青山不放松”</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260604/1fb27fd3dad44e47b5c56af25518b771/c.html" target="_blank" rel="noopener">改善生态环境需“咬定青山不放松”</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://tv.cctv.com/2026/06/05/VIDE1YFi8S0TAGmKh3Ts04It260605.shtml" data-title="“三北”攻坚进行时 “十大孔兑”综合治理攻坚提速" data-source="央视网新闻" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>国内</span>
+                    <time>“三北”攻坚进行时 “十大孔兑”综合治理</time>
+                </div>
+                <a class="news-title" href="https://tv.cctv.com/2026/06/05/VIDE1YFi8S0TAGmKh3Ts04It260605.shtml" target="_blank" rel="noopener">“三北”攻坚进行时 “十大孔兑”综合治理攻坚提速</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=一馒落三馒生" data-title="5. 一馒落三馒生" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=一馒落三馒生" target="_blank" rel="noopener">5. 一馒落三馒生</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 74万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634741.shtml" data-title="践行习近平生态文明思想的时代答卷" data-source="中国新闻网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>主线</span>
+                    <time>2026-06-05 14:05</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634741.shtml" target="_blank" rel="noopener">践行习近平生态文明思想的时代答卷</a>
+                <p>6月5日是世界环境日，今年我国环境日主题为“全面绿色转型，共建美丽中国”。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634751.shtml" data-title="北京警方助力高考考生居民身份证“一对一”直达" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:22</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634751.shtml" target="_blank" rel="noopener">北京警方助力高考考生居民身份证“一对一”直达</a>
+                <p>中新网北京6月5日电 (记者 吕少威)高考临近，针对部分考生可能出现居民身份证丢失或损坏急需换领、补领的情况，北京警方于6月4日至10日，启动高考考生居民身份证补领、换领24小时办理绿色通道，并携手中国邮政集团有限公司北京市分公司实现证件“一对一”24小时内速递直达。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634745.shtml" data-title="全国首张“无目的地海上游”出入境通行证在上海签发" data-source="中国新闻网 · 财经" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:10</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634745.shtml" target="_blank" rel="noopener">全国首张“无目的地海上游”出入境通行证在上海签发</a>
+                <p>今天(6月5日)，全国首张“无目的地海上游”出入境通行证在上海签发。该证件落地后，游客可依托相关政策实现免办签证、短途出海度假，进一步丰富国内邮轮出游选择。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634667.shtml" data-title="俄总统新闻秘书：普京不会赴美观看世界杯" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:33</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634667.shtml" target="_blank" rel="noopener">俄总统新闻秘书：普京不会赴美观看世界杯</a>
+                <p>中新网6月5日电 据俄新社5日报道，俄罗斯总统新闻秘书佩斯科夫称，俄总统普京不会赴美观看2026年美加墨世界杯比赛。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107469.shtml" data-title="广东代表团在本次人大会议上所提议案均为法律案" data-source="央视网新闻 · 国内" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>会议</span>
+                    <time>2007-03-15 21:36</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107469.shtml" target="_blank" rel="noopener">广东代表团在本次人大会议上所提议案均为法律案</a>
+                <p>中新社北京三月十五日电 (记者 郭军)记者今天从广东代表团了解到，在十届全国人大五次会议上，广东代表团提交的二十三件议案全部为法律案，议案涉及内容更加关注民生。……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/zt/slhjxzqzjg/index.html" data-title="树立和践行正确政绩观" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>树立和践行正确政绩观</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/zt/slhjxzqzjg/index.html" target="_blank" rel="noopener">树立和践行正确政绩观</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260604/8f02dc0e4a3b4754802673b167aba371/c.html" data-title="执绿色画笔 绘美丽中国" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>执绿色画笔 绘美丽中国</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260604/8f02dc0e4a3b4754802673b167aba371/c.html" target="_blank" rel="noopener">执绿色画笔 绘美丽中国</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://tv.cctv.com/2026/06/05/VIDEkw5LtXN3AOvJCPGQiRDg260605.shtml" data-title="夏季血压下降 可以停药吗？" data-source="央视网新闻" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻</span>
+                    <span>国内</span>
+                    <time>夏季血压下降 可以停药吗？</time>
+                </div>
+                <a class="news-title" href="https://tv.cctv.com/2026/06/05/VIDEkw5LtXN3AOvJCPGQiRDg260605.shtml" target="_blank" rel="noopener">夏季血压下降 可以停药吗？</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=存款达到多少可以提前退休" data-title="6. 存款达到多少可以提前退休" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=存款达到多少可以提前退休" target="_blank" rel="noopener">6. 存款达到多少可以提前退休</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 72万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634719.shtml" data-title="最高法：2025年审结环境资源一审案件22.9万件" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 13:54</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634719.shtml" target="_blank" rel="noopener">最高法：2025年审结环境资源一审案件22.9万件</a>
+                <p>中新网6月5日电 6月5日，最高人民法院举行新闻发布会，发布《中国环境资源审判(2025)》《中国环境司法发展报告(2025年)》，以及2025年度人民法院环境资源审判典型案例。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634753.shtml" data-title="2025年度中国生态环境十大科技进展发布 钍基熔盐堆等入选" data-source="中国新闻网 · 社会" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:21</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634753.shtml" target="_blank" rel="noopener">2025年度中国生态环境十大科技进展发布 钍基熔盐堆等入选</a>
+                <p>中新网北京6月5日电 (记者 孙自法)6月5日是世界环境日，中国科协生态环境产学联合体当天在北京发布了2025年度中国生态环境十大科技进展，森林生物多样性维持、城市污水处理、钍基熔盐堆等十大进展入选，反映出中国生态环境科技领域前沿发展动态。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634710.shtml" data-title="从“暖心菜园”到“富民产业” 山西晋中一村庄铺就安居与富民双赢路" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 14:10</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634710.shtml" target="_blank" rel="noopener">从“暖心菜园”到“富民产业” 山西晋中一村庄铺就安居与富民双赢路</a>
+                <p>在山西晋中太谷区阳邑乡窑子头村的小区楼前，放眼望去，地块间，各类菜苗青翠繁茂、长势正好，一块块菜地端头标注着户主姓名与地块编号。焦玉虎 摄 中新网晋中6月5日电 题：从“暖心菜园”到“富民产业” 山西晋中一村庄铺就安居与富民双赢路</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634680.shtml" data-title="以军称打死哈马斯安全机构多名高级成员" data-source="中国新闻网 · 国际" data-category="视频">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>视频</span>
+                    <time>2026-06-05 11:29</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634680.shtml" target="_blank" rel="noopener">以军称打死哈马斯安全机构多名高级成员</a>
+                <p>中新网6月5日电 据以色列《耶路撒冷邮报》5日报道，以军对加沙地带北部实施空袭，打死巴勒斯坦伊斯兰抵抗运动(哈马斯)安全机构多名高级成员。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107465.shtml" data-title="中国公司窃美高科技？中方驳斥:有些人内心脆弱" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 21:35</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107465.shtml" target="_blank" rel="noopener">中国公司窃美高科技？中方驳斥:有些人内心脆弱</a>
+                <p>&lt;P align=center&gt;&lt;TABLE align=center border=0 To1ForShow&gt;&lt;TBODY&gt;&lt;TR&gt;&lt;TD&gt;&lt;IMG src=&quot;http://news.cctv.com/20070315/images/1173965778894_1173965…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/xbmfjg/index.htm" data-title="中央和国家机关建设让党中央放心、让人民群众满意的模范机关" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>中央和国家机关建设让党中央放心、让人民群</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/xbmfjg/index.htm" target="_blank" rel="noopener">中央和国家机关建设让党中央放心、让人民群众满意的模范机关</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260605/22787be4b0824cdc8f62d8d06e984f5c/c.html" data-title="加快农业农村现代化步伐" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>加快农业农村现代化步伐</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260605/22787be4b0824cdc8f62d8d06e984f5c/c.html" target="_blank" rel="noopener">加快农业农村现代化步伐</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=租房的三件套" data-title="7. 租房的三件套" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=租房的三件套" target="_blank" rel="noopener">7. 租房的三件套</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 69万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634659.shtml" data-title="贵州省农业发展集团党委书记芦忠于接受审查调查" data-source="中国新闻网 · 时政" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>国内</span>
+                    <time>2026-06-05 11:50</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634659.shtml" target="_blank" rel="noopener">贵州省农业发展集团党委书记芦忠于接受审查调查</a>
+                <p>中新网6月5日电 据贵州省纪委监委消息，贵州省农业发展集团有限责任公司党委书记、董事长芦忠于涉嫌严重违纪违法，目前正接受贵州省纪委监委纪律审查和监察调查。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634752.shtml" data-title="2025年上海空气质量优良率达到88.5%" data-source="中国新闻网 · 社会" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:21</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634752.shtml" target="_blank" rel="noopener">2025年上海空气质量优良率达到88.5%</a>
+                <p>中新网上海6月5日电 (记者 陈静)上海市生态环境局5日发布《2025年上海市生态环境状况公报》(下称：“公报”)。“公报”显示，2025年，上海空气质量优良率达到88.5%；PM2.5年均浓度降至26微克/立方米；地表水优Ⅲ类断面比例达到99.3%，黄浦江、长江(上海段)入选…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634729.shtml" data-title="端午假期火车票开售！多航线仍有300元左右机票" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 13:53</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634729.shtml" target="_blank" rel="noopener">端午假期火车票开售！多航线仍有300元左右机票</a>
+                <p>中新经纬6月5日电 (熊思怡)距离端午假期仅剩两周，去哪儿玩想好没？</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634675.shtml" data-title="伊朗警告以军勿向贝鲁特南郊推进" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:23</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634675.shtml" target="_blank" rel="noopener">伊朗警告以军勿向贝鲁特南郊推进</a>
+                <p>伊朗最高领袖军事顾问雷扎伊4日警告称，如果以色列向黎巴嫩贝鲁特南郊方向推进，伊朗所有的导弹将会蓄势待发，此举将让以色列承受巨大代价。该地区一直以来都被以色列视作黎巴嫩真主党的核心据点，此前以军已多次空袭该地区。（CCTV国际时讯）</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107384.shtml" data-title="日本自民党、公明党干事长抵京访华" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 21:29</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107384.shtml" target="_blank" rel="noopener">日本自民党、公明党干事长抵京访华</a>
+                <p>新华网北京３月１５日电（记者 李诗佳）日本自民党干事长中川秀直、公明党干事长北侧一雄１５日率执政党代表团抵达北京，开始对中国进行为期５天的访问。 ……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260605/b2515b28fc6e44bdb0ec8cc94fb56520/c.html" data-title="芒种：仲夏始，“三夏”时，耕耘又收获" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>芒种：仲夏始，“三夏”时，耕耘又收获</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260605/b2515b28fc6e44bdb0ec8cc94fb56520/c.html" target="_blank" rel="noopener">芒种：仲夏始，“三夏”时，耕耘又收获</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260605/0a89d7870287445e8decf9b4263e09d0/c.html" data-title="习近平将对朝鲜民主主义人民共和国进行国事访问" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>习近平将对朝鲜民主主义人民共和国进行国事</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260605/0a89d7870287445e8decf9b4263e09d0/c.html" target="_blank" rel="noopener">习近平将对朝鲜民主主义人民共和国进行国事访问</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=华莱士第五人格联名" data-title="8. 华莱士第五人格联名" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=华莱士第五人格联名" target="_blank" rel="noopener">8. 华莱士第五人格联名</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 58万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634657.shtml" data-title="贵州省黔南州人大常委会副主任朱奉余接受审查调查" data-source="中国新闻网 · 时政" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>会议</span>
+                    <time>2026-06-05 11:50</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634657.shtml" target="_blank" rel="noopener">贵州省黔南州人大常委会副主任朱奉余接受审查调查</a>
+                <p>中新网6月5日电 据贵州省纪委监委消息，贵州省黔南州人大常委会党组成员、副主任朱奉余涉嫌严重违纪违法，目前正接受贵州省纪委监委纪律审查和监察调查。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634749.shtml" data-title="全国首张“无目的地海上游”出入境通行证在沪签发" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:19</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634749.shtml" target="_blank" rel="noopener">全国首张“无目的地海上游”出入境通行证在沪签发</a>
+                <p>中新网上海6月5日电(李姝徵 狄权)全国首张“无目的地海上游”出入境通行证5日在沪签发。这也标志着备受瞩目的“爱达·魔都号”周末海上游航线进入发船倒计时，届时民众可“无需签证免请假、周末登轮即度假”。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634678.shtml" data-title="市场监管总局发布《中国反垄断执法年度报告（2025）》" data-source="中国新闻网 · 财经" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>政策</span>
+                    <time>2026-06-05 11:36</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634678.shtml" target="_blank" rel="noopener">市场监管总局发布《中国反垄断执法年度报告（2025）》</a>
+                <p>中新网6月5日电 据国家市场监督管理总局网站消息，近日，市场监管总局(国家反垄断局)发布《中国反垄断执法年度报告(2025)》，主要包括特辑、全年工作综述、监管执法成效、法治建设、公平竞争政策实施、竞争宣传倡导、国际交流合作和地方工作等内容。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634672.shtml" data-title="匈牙利同意开启乌克兰加入欧盟谈判" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:21</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634672.shtml" target="_blank" rel="noopener">匈牙利同意开启乌克兰加入欧盟谈判</a>
+                <p>匈牙利总理毛焦尔·彼得4日表示，匈牙利已同意开启乌克兰加入欧盟的谈判。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107235.shtml" data-title="代表、委员谈落实两会精神 做好2007年各项工作" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 21:21</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107235.shtml" target="_blank" rel="noopener">代表、委员谈落实两会精神 做好2007年各项工作</a>
+                <p>&lt;P align=center&gt;&lt;STRONG&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;展望未来信心十足 狠抓落实时不我待&lt;/STRONG&gt;&lt;/P&gt;&lt;P align=center&gt;&lt;STRONG&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;——代表委员谈落实两会精神…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/photo/20260603/1fc6a585d2004d0e96aaec1b0bfb445d/c.html" data-title="黑龙江北大荒开展无人机AI田间苗情查验" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>黑龙江北大荒开展无人机AI田间苗情查验</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/photo/20260603/1fc6a585d2004d0e96aaec1b0bfb445d/c.html" target="_blank" rel="noopener">黑龙江北大荒开展无人机AI田间苗情查验</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/leaders/20260605/5571db15fbdc40339f25653298586fa9/c.html" data-title="微纪录片丨水润旱塬" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>微纪录片丨水润旱塬</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/leaders/20260605/5571db15fbdc40339f25653298586fa9/c.html" target="_blank" rel="noopener">微纪录片丨水润旱塬</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=高考试卷押送车队震撼瞬间" data-title="9. 高考试卷押送车队震撼瞬间" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=高考试卷押送车队震撼瞬间" target="_blank" rel="noopener">9. 高考试卷押送车队震撼瞬间</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 53万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634655.shtml" data-title="厦门海关原副关长、一级巡视员邓光文接受审查调查" data-source="中国新闻网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>主线</span>
+                    <time>2026-06-05 11:49</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634655.shtml" target="_blank" rel="noopener">厦门海关原副关长、一级巡视员邓光文接受审查调查</a>
+                <p>中新网6月5日电 据中央纪委国家监委驻海关总署纪检监察组、山西省纪委监委消息，厦门海关原副关长、一级巡视员邓光文涉嫌严重违纪违法，目前正在接受中央纪委国家监委驻海关总署纪检监察组纪律审查和山西省运城市监察委员会监察调查。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634743.shtml" data-title="南通博物苑就“琵琶琴头装反”致歉：已撤展更换" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:16</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634743.shtml" target="_blank" rel="noopener">南通博物苑就“琵琶琴头装反”致歉：已撤展更换</a>
+                <p>中新网6月5日电 据“南通博物苑”微信公众号消息，近日，部分市民及网友反馈南通博物苑基本陈列中一件琵琶展品“存在琴头部件明显安装颠倒、错位”的问题。南通博物苑第一时间组织专业人员开展核查，现将相关情况说明如下：</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634656.shtml" data-title="深圳至尼泊尔加德满都航线开通" data-source="中国新闻网 · 财经" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:16</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634656.shtml" target="_blank" rel="noopener">深圳至尼泊尔加德满都航线开通</a>
+                <p>中新社深圳6月5日电 (索有为 曾辉)5日4时许，一架喜马拉雅航空国际航班由尼泊尔加德满都飞抵深圳宝安国际机场，并于2小时后返回尼泊尔。近260名旅客顺利入出境，标志着深圳往返加德满都航线顺利开通。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634647.shtml" data-title="美媒：先后部署到委内瑞拉和伊朗，美军“福特”号航母损毁严重" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 11:02</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634647.shtml" target="_blank" rel="noopener">美媒：先后部署到委内瑞拉和伊朗，美军“福特”号航母损毁严重</a>
+                <p>中新网6月5日电 据美国有线电视新闻网(CNN)5日最新报道，美军“福特”号航空母舰2026年3月在参与对伊军事行动期间发生火灾，美国海军当时称火势已“得到控制”，两名水兵因“无生命危险的伤势”接受了治疗，且该航母“完全具备作战能力”。但根据CNN获得的最新视频显示，“福特”号…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107213.shtml" data-title="[高官表情]黄奇帆机智巧答：教育发展财力为盾" data-source="央视网新闻 · 国内" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>社会</span>
+                    <time>2007-03-15 21:18</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107213.shtml" target="_blank" rel="noopener">[高官表情]黄奇帆机智巧答：教育发展财力为盾</a>
+                <p>&lt;TABLE borderColor=#cc0000 cellSpacing=5 cellPadding=5 width=&quot;100%&quot; bgColor=#ffffff border=1&gt;&lt;TBODY&gt;&lt;TR borderColor=#cc0000&gt;&lt;TD&gt;&lt;FONT face=…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260602/f6c487a05eb545949682b08bebba5a63/c.html" data-title="全国“安全生产月”|送你一份日常安全时刻表" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>全国“安全生产月”|送你一份日常安全时刻</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260602/f6c487a05eb545949682b08bebba5a63/c.html" target="_blank" rel="noopener">全国“安全生产月”|送你一份日常安全时刻表</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260604/8be1bf82952549e8bcca26d7942ff9a0/c.html" data-title="伟大征程丨古田会议：从“星星之火”到“复兴炬火”" data-source="新华网 · 要闻" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>会议</span>
+                    <time>伟大征程丨古田会议：从“星星之火”到“复</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260604/8be1bf82952549e8bcca26d7942ff9a0/c.html" target="_blank" rel="noopener">伟大征程丨古田会议：从“星星之火”到“复兴炬火”</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=英国间谍2次偷窃中国茶叶机密" data-title="10. 英国间谍2次偷窃中国茶叶机密" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=英国间谍2次偷窃中国茶叶机密" target="_blank" rel="noopener">10. 英国间谍2次偷窃中国茶叶机密</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 48万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634654.shtml" data-title="交通银行黑龙江省分行原副行长陈会一接受审查调查" data-source="中国新闻网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>主线</span>
+                    <time>2026-06-05 11:49</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634654.shtml" target="_blank" rel="noopener">交通银行黑龙江省分行原副行长陈会一接受审查调查</a>
+                <p>中新网6月5日电 据中央纪委国家监委驻交通银行纪检监察组、黑龙江省纪委监委消息，交通银行黑龙江省分行原党委委员、副行长陈会一涉嫌严重违纪违法，目前正接受中央纪委国家监委驻交通银行纪检监察组纪律审查和黑龙江省牡丹江市监察委员会监察调查。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634718.shtml" data-title="同心护生态 粤桂六市深化云开山司法保护区域合作" data-source="中国新闻网 · 社会" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>会议</span>
+                    <time>2026-06-05 14:12</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634718.shtml" target="_blank" rel="noopener">同心护生态 粤桂六市深化云开山司法保护区域合作</a>
+                <p>中新网茂名6月5日电 (梁盛 邹梦婵)5日是2026年“六五环境日”，以“粤桂同心护生态 法检聚力守云开”为主题的粤桂6市深化云开山司法保护区域合作会议在广东茂名市召开。广东茂名、湛江、阳江、云浮与广西梧州、玉林等6市中级法院、检察院，总结三年协作成效、签约深化合作意见，合力守…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634649.shtml" data-title="加强公平竞争 《中国反垄断执法年度报告（2025）》发布" data-source="中国新闻网 · 财经" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>政策</span>
+                    <time>2026-06-05 11:07</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634649.shtml" target="_blank" rel="noopener">加强公平竞争 《中国反垄断执法年度报告（2025）》发布</a>
+                <p>记者今天了解到，市场监管总局(国家反垄断局)发布《中国反垄断执法年度报告(2025)》，报告指出，2025年市场监管总局在反垄断监管执法领域持续发力，全年立案市场垄断案件20件，办结22件，罚没款合计6.53亿元；稳步提升经营者集中监管质效，全年审结经营者集中706件，同比增长…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634632.shtml" data-title="阿曼首都附近一港口发生爆炸 石油装载作业暂停" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 10:49</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634632.shtml" target="_blank" rel="noopener">阿曼首都附近一港口发生爆炸 石油装载作业暂停</a>
+                <p>当地时间5日，有消息称，阿曼首都马斯喀特附近的法赫勒港发生爆炸，导致石油装载作业暂停。爆炸据称由无人机袭击造成。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107106.shtml" data-title="29名委员联名要求尽快停止执行独生子女条例" data-source="央视网新闻 · 国内" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>政策</span>
+                    <time>2007-03-15 21:15</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107106.shtml" target="_blank" rel="noopener">29名委员联名要求尽快停止执行独生子女条例</a>
+                <p>&lt;P&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;来源：中国网 &lt;/P&gt;&lt;P&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;全国政协委员、中国科学院研究员叶廷芳等29名委员联名提交提案，要求我国尽快停止独生子女条例的执行，恢复原先的“一个不少，两个正好”方针。 &lt;/P&gt;&lt;…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/20260601/3e5e654ef9b548f3ab2cc85d22ea2289/c.html" data-title="那个为国研制“争气机”的院士走了——追忆顾诵芬" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>那个为国研制“争气机”的院士走了——追忆</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/20260601/3e5e654ef9b548f3ab2cc85d22ea2289/c.html" target="_blank" rel="noopener">那个为国研制“争气机”的院士走了——追忆顾诵芬</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/photo/20260605/19235dbc83f34bdc829c448844aac4f4/c.html" data-title="倡导绿色生活 建设美丽中国" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>倡导绿色生活 建设美丽中国</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/photo/20260605/19235dbc83f34bdc829c448844aac4f4/c.html" target="_blank" rel="noopener">倡导绿色生活 建设美丽中国</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=C罗姆巴佩詹姆斯超燃世界杯短片" data-title="11. C罗姆巴佩詹姆斯超燃世界杯短片" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=C罗姆巴佩詹姆斯超燃世界杯短片" target="_blank" rel="noopener">11. C罗姆巴佩詹姆斯超燃世界杯短片</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 39万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634651.shtml" data-title="习近平将对朝鲜民主主义人民共和国进行国事访问" data-source="中国新闻网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>主线</span>
+                    <time>2026-06-05 11:20</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634651.shtml" target="_blank" rel="noopener">习近平将对朝鲜民主主义人民共和国进行国事访问</a>
+                <p>中新社北京6月5日电 中共中央对外联络部发言人5日宣布：应朝鲜劳动党总书记、朝鲜民主主义人民共和国国务委员长金正恩邀请，中共中央总书记、中华人民共和国主席习近平将于6月8日至9日对朝鲜民主主义人民共和国进行国事访问。(完)</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634717.shtml" data-title="四川雅砻江流域连续16年增殖放流鱼类累计超3000万尾" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:11</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634717.shtml" target="_blank" rel="noopener">四川雅砻江流域连续16年增殖放流鱼类累计超3000万尾</a>
+                <p>中新网成都6月5日电(记者 王鹏)6月5日，45万尾细鳞裂腹鱼、金沙鲈鲤、长薄鳅等长江上游特有鱼类在位于四川省凉山州的雅砻江杨房沟河段成功放流。记者获悉，目前雅砻江全流域珍稀鱼类增殖放流总量累计突破3000万尾、放流鱼类种类达13种，长江上游特有鱼类放流数量居全国前列。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634636.shtml" data-title="金观平：锻造实体经济的坚实底盘" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:51</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634636.shtml" target="_blank" rel="noopener">金观平：锻造实体经济的坚实底盘</a>
+                <p>当前，我国正处于全面建设社会主义现代化国家的关键时期，面临着国内经济转型升级、全球产业体系深刻调整的双重挑战。越是形势复杂，越要站稳脚跟。“实体经济是我国发展的本钱，是构筑未来发展战略优势的重要支撑”“要深刻把握发展的阶段性新特征新要求，坚持把做实做强做优实体经济作为主攻方向”…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634601.shtml" data-title="特朗普表示，普尔特不会正式担任国家情报总监" data-source="中国新闻网 · 国际" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:22</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634601.shtml" target="_blank" rel="noopener">特朗普表示，普尔特不会正式担任国家情报总监</a>
+                <p>中新网6月5日电 据美国消费者新闻与商业频道(CNBC)报道，美国总统特朗普当地时间4日表示，他任命的代理国家情报总监、现联邦住房金融署署长比尔·普尔特不会是国家情报总监这一关键安全职位的“长期”人选。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107139.shtml" data-title="代表亲近基层 八成议案关注民生" data-source="央视网新闻 · 国内" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>社会</span>
+                    <time>2007-03-15 21:15</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107139.shtml" target="_blank" rel="noopener">代表亲近基层 八成议案关注民生</a>
+                <p>&lt;SPAN lang=EN-US&gt;&lt;FONT face=&quot;Times New Roman&quot;&gt;&lt;P class=MsoNormal style=&quot;MARGIN: 0cm 0cm 0pt; TEXT-INDENT: 21pt; mso-char-indent-count: 2.0;…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260605/3d251b697bc3413987bf7ab480d9a5f8/c.html" data-title="“从0到1”，哈工大向基础研究发起冲锋" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>“从0到1”，哈工大向基础研究发起冲锋</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260605/3d251b697bc3413987bf7ab480d9a5f8/c.html" target="_blank" rel="noopener">“从0到1”，哈工大向基础研究发起冲锋</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260605/829b38d258784eb0a5cdb832a241042d/c.html" data-title="实绩说Vlog丨塞罕坝务林人：荒漠变林海，坚守护长青" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>实绩说Vlog丨塞罕坝务林人：荒漠变林海</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260605/829b38d258784eb0a5cdb832a241042d/c.html" target="_blank" rel="noopener">实绩说Vlog丨塞罕坝务林人：荒漠变林海，坚守护长青</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=攻玉官宣" data-title="12. 攻玉官宣" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=攻玉官宣" target="_blank" rel="noopener">12. 攻玉官宣</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 35万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634658.shtml" data-title="机构评估中国《国家人权行动计划（2021－2025年）》181项任务指标全部完成" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 11:17</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634658.shtml" target="_blank" rel="noopener">机构评估中国《国家人权行动计划（2021－2025年）》181项任务指标全部完成</a>
+                <p>中新社北京6月5日电 中国人权研究会、国家人权教育与培训基地5日联合发布《〈国家人权行动计划(2021－2025年)〉实施评估报告》。报告显示，《国家人权行动计划(2021－2025年)》得到全面实施，181项任务指标全部完成，总计44项约束性指标中有20项系提前或超额完成，中…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634716.shtml" data-title="（乡村行·看振兴）广东清远浸潭镇：三华李结出乡村“致富果”" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:11</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634716.shtml" target="_blank" rel="noopener">（乡村行·看振兴）广东清远浸潭镇：三华李结出乡村“致富果”</a>
+                <p>中新网清远6月5日电 (张璐 李嘉琪)近日，走进广东省清远市浸潭镇新寨村的三华李种植基地(简称“基地”)，漫山遍野的李树郁郁葱葱，一颗颗饱满圆润、果粉均匀的果实缀满枝头，果香四溢，令人垂涎。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634625.shtml" data-title="第二届海峡养老产业博览会将于10月在福州举办" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:49</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634625.shtml" target="_blank" rel="noopener">第二届海峡养老产业博览会将于10月在福州举办</a>
+                <p>中新网福州6月5日电(林玲 邹挺超)以“福见康养 福享乐龄”为主题的第二届海峡养老产业博览会(简称“海峡老博会”)将于2026年10月23日至25日在福州海峡国际会展中心举行。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634552.shtml" data-title="新加坡青年领袖：青年群体为中国—东盟协作注入创新动能丨世界观" data-source="中国新闻网 · 国际" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:17</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634552.shtml" target="_blank" rel="noopener">新加坡青年领袖：青年群体为中国—东盟协作注入创新动能丨世界观</a>
+                <p>中新网北京6月5日电 (记者 吴辛茹 薛凌桥)人工智能技术的飞速迭代与数字经济的迅猛发展，重塑了全球商业模式与创新发展逻辑。中国与东盟区域合作，也搭乘数字化浪潮前行。中国与东盟国家的青年群体，已然成为推动双边产业协作、深化创新合作的核心动能。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/107057.shtml" data-title="[一丹两会信箱]“3.15”日看霸王条款" data-source="央视网新闻 · 国内" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国内</span>
+                    <time>2007-03-15 21:10</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/107057.shtml" target="_blank" rel="noopener">[一丹两会信箱]“3.15”日看霸王条款</a>
+                <p>&lt;P&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CCTV.com消息（东方时空）：&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/P&gt;&lt;P align=center&gt;&lt;TABLE align=center border=0 To1ForShow&gt;&lt;TBOD…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260604/511457272ed84e72a8b744983ace88e2/c.html" data-title="牢记初心使命 奋进复兴征程丨嘉兴：革命红船起航地 共富实干谱新篇" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>牢记初心使命 奋进复兴征程丨嘉兴：革命红</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260604/511457272ed84e72a8b744983ace88e2/c.html" target="_blank" rel="noopener">牢记初心使命 奋进复兴征程丨嘉兴：革命红船起航地 共富实干谱新篇</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/photo/20260605/21248ee0d1df4177bc45247ae9673b08/c.html" data-title="南海影像日志丨逐浪南海守蔚蓝" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>南海影像日志丨逐浪南海守蔚蓝</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/photo/20260605/21248ee0d1df4177bc45247ae9673b08/c.html" target="_blank" rel="noopener">南海影像日志丨逐浪南海守蔚蓝</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=陈学冬 避谶" data-title="13. 陈学冬 避谶" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=陈学冬 避谶" target="_blank" rel="noopener">13. 陈学冬 避谶</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 35万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634639.shtml" data-title="《儿童友好公共设施服务体系建设指南》国家标准发布" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 10:58</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634639.shtml" target="_blank" rel="noopener">《儿童友好公共设施服务体系建设指南》国家标准发布</a>
+                <p>中新网6月5日电 据“市说新语”微信公众号消息，近日，市场监管总局(国家标准委)批准发布《儿童友好公共设施服务体系建设指南》(GB/T 47703—2026)国家标准，自2026年12月1日起实施。该标准立足我国城市发展实际与儿童成长需求，旨在构建科学完善、覆盖全面的儿童友好公…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634708.shtml" data-title="西安市清退3000余辆不合规网约车" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:09</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634708.shtml" target="_blank" rel="noopener">西安市清退3000余辆不合规网约车</a>
+                <p>中新网西安6月5日电 (记者 梅镱泷)记者5日从西安市交通运输局获悉，该局联合公安交管部门，通过数智执法持续开展不合规网约车专项清退工作，近日已完成各网约车平台3072辆不合规网约车清退封禁工作。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634619.shtml" data-title="入境游迎爆发窗口期 行业龙头加码布局" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:48</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634619.shtml" target="_blank" rel="noopener">入境游迎爆发窗口期 行业龙头加码布局</a>
+                <p>“中国很好玩，也有很多机会！”第二次来华商务考察的加拿大旅行商杰米(化名)兴奋地和记者说，最近他新认识了一批中国旅行商，计划今年共同开发北京、桂林等多条特色体验线路，给自己的生意“加码”。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634590.shtml" data-title="绿色转型发展蓝图正在中国加速成为现实" data-source="中国新闻网 · 国际" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>会议</span>
+                    <time>2026-06-05 10:15</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634590.shtml" target="_blank" rel="noopener">绿色转型发展蓝图正在中国加速成为现实</a>
+                <p>绿色转型发展蓝图正在中国加速成为现实(国际论坛·读懂中国·读懂中国式现代化)</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/106960.shtml" data-title="外交部就中日联合声明、汇业银行等问题答问" data-source="央视网新闻 · 国内" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>国际</span>
+                    <time>2007-03-15 21:00</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/106960.shtml" target="_blank" rel="noopener">外交部就中日联合声明、汇业银行等问题答问</a>
+                <p>&lt;P align=center&gt;&lt;TABLE align=center border=0 To1ForShow&gt;&lt;TBODY&gt;&lt;TR&gt;&lt;TD&gt;&lt;IMG src=&quot;http://news.cctv.com/20070315/images/1173963840093_1173963…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260605/ac15bbae60ee4e3f8a7c8831efc3df8f/c.html" data-title="假冒学历认证等网站 公安部网安局发布典型案例" data-source="新华网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>政策</span>
+                    <time>假冒学历认证等网站 公安部网安局发布典型</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260605/ac15bbae60ee4e3f8a7c8831efc3df8f/c.html" target="_blank" rel="noopener">假冒学历认证等网站 公安部网安局发布典型案例</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://education.news.cn/20260605/01d7b843042142539cb5201511e41a95/c.html" data-title="考前紧张是本能 用“平常心”为高考“助攻”" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>考前紧张是本能 用“平常心”为高考“助攻</time>
+                </div>
+                <a class="news-title" href="https://education.news.cn/20260605/01d7b843042142539cb5201511e41a95/c.html" target="_blank" rel="noopener">考前紧张是本能 用“平常心”为高考“助攻”</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=判断孩子有没有学霸潜质" data-title="14. 判断孩子有没有学霸潜质" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=判断孩子有没有学霸潜质" target="_blank" rel="noopener">14. 判断孩子有没有学霸潜质</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 34万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634627.shtml" data-title="台州援疆干部多维发力交出创新援疆答卷" data-source="中国新闻网 · 时政" data-category="国内">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>国内</span>
+                    <time>2026-06-05 10:52</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634627.shtml" target="_blank" rel="noopener">台州援疆干部多维发力交出创新援疆答卷</a>
+                <p>中新网乌鲁木齐6月5日电 (卿朋)在新疆生产建设兵团第一师十二团中学每周社团活动日，婉转的越剧唱腔都会从“和合石榴籽曲苑”越剧展馆飘出。孩子们穿上戏服，水袖轻扬，有模有样。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634707.shtml" data-title="广东公安推出28项措施护航高考 防范打击新型作弊手段" data-source="中国新闻网 · 社会" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:09</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634707.shtml" target="_blank" rel="noopener">广东公安推出28项措施护航高考 防范打击新型作弊手段</a>
+                <p>中新网广州6月5日电 (记者 方伟彬)广东省公安厅5日发布消息，2026年高考在即，该厅提前谋划、全警动员，研究出台《粤警全力以赴护航高考28项措施》。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634629.shtml" data-title="我国高端钢材供给持续增强" data-source="中国新闻网 · 财经" data-category="财经">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>财经</span>
+                    <time>2026-06-05 10:47</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634629.shtml" target="_blank" rel="noopener">我国高端钢材供给持续增强</a>
+                <p>央视网消息(新闻联播)：今年以来，我国高端钢材供给持续增强，一批用于新能源汽车、机器人等领域的特种钢加快涌现，为新兴产业发展提供基础材料支撑。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634585.shtml" data-title="黎真主党拒绝停火谈判结果 黎以冲突持续" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 10:12</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634585.shtml" target="_blank" rel="noopener">黎真主党拒绝停火谈判结果 黎以冲突持续</a>
+                <p>中新社北京6月5日电 综合消息：黎巴嫩真主党领导人纳伊姆·卡西姆当地时间4日通过黎“灯塔”电视台发表声明，称黎真主党完全拒绝此前停火谈判的结果。与此同时，黎以交火持续，并造成多人伤亡。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/xwlb/20070315/106858.shtml" data-title="全国政协十届五次会议胜利闭幕" data-source="央视网新闻 · 国内" data-category="会议">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>会议</span>
+                    <time>2007-03-15 20:05</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/xwlb/20070315/106858.shtml" target="_blank" rel="noopener">全国政协十届五次会议胜利闭幕</a>
+                <p>CCTV.com消息（新闻联播）：全国政协十届五次会议圆满完成了各项议程，今天上午在人民大会堂胜利闭幕。……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/politics/20260605/bbb6662e7d5a4596a9ef10c6f3921cf1/c.html" data-title="镜观中国丨全面绿色转型 共建美丽中国" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>镜观中国丨全面绿色转型 共建美丽中国</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/politics/20260605/bbb6662e7d5a4596a9ef10c6f3921cf1/c.html" target="_blank" rel="noopener">镜观中国丨全面绿色转型 共建美丽中国</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/video/20260605/c73834fba1ff439f832779286b87a4da/c.html" data-title="热点追踪丨我们为什么要在太空种水稻？" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>热点追踪丨我们为什么要在太空种水稻？</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/video/20260605/c73834fba1ff439f832779286b87a4da/c.html" target="_blank" rel="noopener">热点追踪丨我们为什么要在太空种水稻？</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=奚梦瑶模特朋友一个没来" data-title="15. 奚梦瑶模特朋友一个没来" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=奚梦瑶模特朋友一个没来" target="_blank" rel="noopener">15. 奚梦瑶模特朋友一个没来</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 33万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634633.shtml" data-title="老挝人民革命党中央总书记、国家主席通伦向人民英雄纪念碑敬献花圈" data-source="中国新闻网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>主线</span>
+                    <time>2026-06-05 10:50</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634633.shtml" target="_blank" rel="noopener">老挝人民革命党中央总书记、国家主席通伦向人民英雄纪念碑敬献花圈</a>
+                <p>新华社北京6月5日电 6月5日上午，老挝人民革命党中央总书记、国家主席通伦前往天安门广场，向人民英雄纪念碑敬献花圈。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634706.shtml" data-title="福州今年首批远洋渔船集中返港 福州边检站高效保障" data-source="中国新闻网 · 社会" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>社会</span>
+                    <time>2026-06-05 14:08</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634706.shtml" target="_blank" rel="noopener">福州今年首批远洋渔船集中返港 福州边检站高效保障</a>
+                <p>中新网福州6月5日电 (记者 闫旭)6月4日，中国籍“福远渔8896”轮等5艘远洋渔船满载1000余吨渔获，缓缓靠泊福州(连江)国家远洋渔业基地码头，福州港今年首批远洋渔船集中返港作业正式开启。福州边检站靠前服务，全力护航远洋渔船平安归港、高效通关。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634621.shtml" data-title="新华社经济随笔：从一颗榴莲看中国大市场机遇" data-source="中国新闻网 · 财经" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>主线</span>
+                    <time>2026-06-05 10:43</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634621.shtml" target="_blank" rel="noopener">新华社经济随笔：从一颗榴莲看中国大市场机遇</a>
+                <p>价格降至每斤20多元，商超货架、社区水果店堆起小山，一些城市推出榴莲自助……今年，东南亚榴莲丰产、高效输华，曾经价格高高在上、令人难以爽快“剁手”的“贵族水果”，正以更丰富的品类、更友好的价格进入中国的千家万户。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634551.shtml" data-title="银针连中莱：一位莱索托患者与中国针灸的不解之缘" data-source="中国新闻网 · 国际" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>社会</span>
+                    <time>2026-06-05 10:12</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634551.shtml" target="_blank" rel="noopener">银针连中莱：一位莱索托患者与中国针灸的不解之缘</a>
+                <p>中新网约翰内斯堡6月5日电 “一根小小的银针，不用任何药物，竟然治好了我的病，中国针灸太神奇了！”6月4日，莱索托居民普莱·莫雷特洛(Pule Moretlo)专程来到马塞卢地区医院，将一封亲笔感谢信送到中国援莱索托医疗队针灸医师苏伟手中。信中，他用朴实真挚的语言讲述了自己在中…</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/106854.shtml" data-title="中国五月一日起将实施《药品广告审查发布标准》" data-source="央视网新闻 · 国内" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>政策</span>
+                    <time>2007-03-15 20:04</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/106854.shtml" target="_blank" rel="noopener">中国五月一日起将实施《药品广告审查发布标准》</a>
+                <p>中新社北京三月十五日电(记者 刘长忠)记者今天从国家工商总局获悉，由国家工商行政管理总局、国家食品药品监督管理局联合颁布修订的《药品广告审查发布标准》将于今年五月一日起实施。……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://www.news.cn/politics/20260603/03921dff52f34f6f922c85fec19b0f04/c.html" data-title="广电总局部署微短剧有害低俗和侵权盗版专项治理" data-source="新华网 · 时政" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 时政</span>
+                    <span>主线</span>
+                    <time>广电总局部署微短剧有害低俗和侵权盗版专项</time>
+                </div>
+                <a class="news-title" href="http://www.news.cn/politics/20260603/03921dff52f34f6f922c85fec19b0f04/c.html" target="_blank" rel="noopener">广电总局部署微短剧有害低俗和侵权盗版专项治理</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.news.cn/world/20260605/10f2e05d584846528bb8ba58bb2bbe80/c.html" data-title="乌拉圭宣布对中国公民免签：虽远隔重洋，但值得万里奔赴！" data-source="新华网 · 要闻" data-category="主线">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>新华网 · 要闻</span>
+                    <span>主线</span>
+                    <time>乌拉圭宣布对中国公民免签：虽远隔重洋，但</time>
+                </div>
+                <a class="news-title" href="https://www.news.cn/world/20260605/10f2e05d584846528bb8ba58bb2bbe80/c.html" target="_blank" rel="noopener">乌拉圭宣布对中国公民免签：虽远隔重洋，但值得万里奔赴！</a>
+                <p></p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://s.weibo.com/weibo?q=杨紫和郭晶晶一起上台领聘" data-title="16. 杨紫和郭晶晶一起上台领聘" data-source="微博热搜" data-category="热搜">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>微博热搜</span>
+                    <span>热搜</span>
+                    <time>2026-06-05 14:49</time>
+                </div>
+                <a class="news-title" href="https://s.weibo.com/weibo?q=杨紫和郭晶晶一起上台领聘" target="_blank" rel="noopener">16. 杨紫和郭晶晶一起上台领聘</a>
+                <p></p>
+                <div class="tag-row"><span class="tag hot">热度 32万</span></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gn/2026/06-05/10634631.shtml" data-title="新国标发布！《儿童友好公共设施服务体系建设指南》将于12月实施" data-source="中国新闻网 · 时政" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 时政</span>
+                    <span>政策</span>
+                    <time>2026-06-05 10:48</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gn/2026/06-05/10634631.shtml" target="_blank" rel="noopener">新国标发布！《儿童友好公共设施服务体系建设指南》将于12月实施</a>
+                <p>记者今天了解到，市场监管总局批准发布《儿童友好公共设施服务体系建设指南》国家标准，自2026年12月1日起实施。该标准立足我国城市发展实际与儿童成长需求，旨在构建科学完善、覆盖全面的儿童友好公共设施服务体系，主要内容体现在三个方面。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/sh/2026/06-05/10634739.shtml" data-title="玻璃幕墙长时间反射强光 居民告赢开发商获赔6.5万元" data-source="中国新闻网 · 社会" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 社会</span>
+                    <span>政策</span>
+                    <time>2026-06-05 14:05</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/sh/2026/06-05/10634739.shtml" target="_blank" rel="noopener">玻璃幕墙长时间反射强光 居民告赢开发商获赔6.5万元</a>
+                <p>今天是世界环境日，最高人民法院发布了2025年度人民法院“环境资源审判”典型案例。在浙江宁波的一起光污染纠纷案例中，业主因为受不了对面建筑玻璃幕墙的长时间强光反射，把该建筑的开发商告上了法庭。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/cj/2026/06-05/10634584.shtml" data-title="5月份中国大宗商品价格指数同比上涨20.2%" data-source="中国新闻网 · 财经" data-category="政策">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 财经</span>
+                    <span>政策</span>
+                    <time>2026-06-05 10:43</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/cj/2026/06-05/10634584.shtml" target="_blank" rel="noopener">5月份中国大宗商品价格指数同比上涨20.2%</a>
+                <p>中新社北京6月5日电 中国物流与采购联合会发布5日发布数据显示，2026年5月份，中国大宗商品价格指数(CBPI)为132.5点，同比上涨20.2%，环比上涨0.3%，环比涨幅连续两个月收窄。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="https://www.chinanews.com.cn/gj/2026/06-05/10634549.shtml" data-title="“丝路画语”艺术展走进南非" data-source="中国新闻网 · 国际" data-category="国际">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>中国新闻网 · 国际</span>
+                    <span>国际</span>
+                    <time>2026-06-05 10:12</time>
+                </div>
+                <a class="news-title" href="https://www.chinanews.com.cn/gj/2026/06-05/10634549.shtml" target="_blank" rel="noopener">“丝路画语”艺术展走进南非</a>
+                <p>中新网约翰内斯堡6月5日电 以“丝路情深，繁荣与共”为主题的2026“丝路画语”艺术展非洲跨国巡展近日在南非约翰内斯堡戈登商学院举行。</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article>
+        <article class="news-item" data-url="http://news.cctv.com/china/20070315/106848.shtml" data-title="港府统计指上季香港本地居民生产总值升近一成" data-source="央视网新闻 · 国内" data-category="社会">
+            <button class="icon-btn favorite-btn" type="button" data-action="favorite" aria-label="收藏新闻" title="收藏新闻">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
+            </button>
+            <div class="news-main">
+                <div class="news-meta">
+                    <span>央视网新闻 · 国内</span>
+                    <span>社会</span>
+                    <time>2007-03-15 20:03</time>
+                </div>
+                <a class="news-title" href="http://news.cctv.com/china/20070315/106848.shtml" target="_blank" rel="noopener">港府统计指上季香港本地居民生产总值升近一成</a>
+                <p>中新社香港三月十五日电 香港特区政府统计处今天公布，去年第四季香港本地居民生产总值按年升百分之九点七，至四千零二十四亿元(港元，下同)；本地生产总值约三千九百七十九亿元，按年增长百分之六点五。……</p>
+                <div class="tag-row"></div>
+            </div>
+            <button class="state-badge read-state" type="button" data-action="read-toggle">未读</button>
+        </article></section>
+  <footer>数据来源于公开网页/RSS/热搜接口；页面状态保存在本机浏览器。</footer>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+  var STORAGE_KEYS = {
+    favorites: 'news_item_favorites',
+    read: 'news_item_read',
+    seen: 'news_item_seen_urls'
+  };
+  var activeCategory = '全部';
+
+  function readSet(key) {
+    try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); }
+    catch (err) { return new Set(); }
+  }
+  function writeSet(key, set) { localStorage.setItem(key, JSON.stringify(Array.from(set))); }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show';
+    setTimeout(function() { t.className = 'toast'; }, 2600);
+  }
+  async function doRefresh() {
+    if (location.protocol === 'file:') {
+      showToast('请从桌面快捷方式打开，刷新按钮才能重新抓取');
+      return;
+    }
+    showToast('正在重新抓取新闻…');
+    try {
+      var response = await fetch('/refresh', { method: 'POST', cache: 'no-store' });
+      var data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || '刷新失败');
+      showToast('刷新完成，正在更新页面…');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch (err) {
+      showToast(err.message || '刷新失败');
+    }
+  }
+  function items() { return Array.prototype.slice.call(document.querySelectorAll('.news-item')); }
+  function applyItemState(item, favorites, read, seen) {
+    var url = item.dataset.url;
+    var isFavorite = favorites.has(url);
+    var isRead = read.has(url);
+    var isNew = seen.size > 0 && !seen.has(url);
+    item.classList.toggle('is-favorite', isFavorite);
+    item.classList.toggle('is-read', isRead);
+    item.classList.toggle('is-new', isNew);
+    var favoriteBtn = item.querySelector('.favorite-btn');
+    var readBtn = item.querySelector('.read-state');
+    favoriteBtn.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
+    readBtn.textContent = isRead ? '已读' : '未读';
+  }
+  function syncState() {
+    var favorites = readSet(STORAGE_KEYS.favorites);
+    var read = readSet(STORAGE_KEYS.read);
+    var seen = readSet(STORAGE_KEYS.seen);
+    var current = new Set();
+    items().forEach(function(item) {
+      current.add(item.dataset.url);
+      applyItemState(item, favorites, read, seen);
+    });
+    current.forEach(function(url) { seen.add(url); });
+    writeSet(STORAGE_KEYS.seen, seen);
+  }
+  function applyFilters() {
+    var query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+    var source = document.getElementById('sourceFilter').value;
+    var state = document.getElementById('stateFilter').value;
+    var visibleCount = 0;
+    items().forEach(function(item) {
+      var text = ((item.dataset.title || '') + ' ' + (item.dataset.source || '')).toLowerCase();
+      var visible = (!query || text.indexOf(query) !== -1)
+        && (source === 'all' || item.dataset.source === source)
+        && (activeCategory === '全部' || item.dataset.category === activeCategory)
+        && (state === 'all'
+          || (state === 'new' && item.classList.contains('is-new'))
+          || (state === 'favorite' && item.classList.contains('is-favorite'))
+          || (state === 'unread' && !item.classList.contains('is-read')));
+      item.classList.toggle('hidden', !visible);
+      if (visible) visibleCount += 1;
+    });
+    document.getElementById('resultLine').innerHTML = '当前显示 <strong>' + visibleCount + '</strong> 条新闻';
+    document.getElementById('emptyResults').classList.toggle('show', visibleCount === 0);
+  }
+  function toggleRead(item) {
+    var read = readSet(STORAGE_KEYS.read);
+    if (read.has(item.dataset.url)) { read.delete(item.dataset.url); showToast('已标为未读'); }
+    else { read.add(item.dataset.url); showToast('已标为已读'); }
+    writeSet(STORAGE_KEYS.read, read);
+    syncState();
+    applyFilters();
+  }
+  function markAllRead() {
+    var read = readSet(STORAGE_KEYS.read);
+    items().forEach(function(item) { read.add(item.dataset.url); });
+    writeSet(STORAGE_KEYS.read, read);
+    syncState();
+    applyFilters();
+    showToast('已全部标为已读');
+  }
+  document.addEventListener('click', function(event) {
+    var favorite = event.target.closest('[data-action="favorite"]');
+    if (favorite) {
+      var item = favorite.closest('.news-item');
+      var favorites = readSet(STORAGE_KEYS.favorites);
+      if (favorites.has(item.dataset.url)) { favorites.delete(item.dataset.url); showToast('已取消收藏'); }
+      else { favorites.add(item.dataset.url); showToast('已收藏'); }
+      writeSet(STORAGE_KEYS.favorites, favorites);
+      syncState();
+      applyFilters();
+      return;
+    }
+    var readToggle = event.target.closest('[data-action="read-toggle"]');
+    if (readToggle) { toggleRead(readToggle.closest('.news-item')); return; }
+    var link = event.target.closest('.news-title');
+    if (link) {
+      var row = link.closest('.news-item');
+      var read = readSet(STORAGE_KEYS.read);
+      read.add(row.dataset.url);
+      writeSet(STORAGE_KEYS.read, read);
+      syncState();
+      applyFilters();
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    syncState();
+    applyFilters();
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('sourceFilter').addEventListener('change', applyFilters);
+    document.getElementById('stateFilter').addEventListener('change', applyFilters);
+    document.querySelectorAll('[data-category]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('[data-category]').forEach(function(item) { item.classList.remove('active'); });
+        button.classList.add('active');
+        activeCategory = button.dataset.category;
+        applyFilters();
+      });
+    });
+  });
+</script>
+</body>
+</html>

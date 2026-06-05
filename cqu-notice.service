@@ -1,0 +1,15 @@
+[Unit]
+Description=CQU Notice Aggregation Website
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cqu-notice
+Environment=HOST=0.0.0.0
+Environment=PORT=8765
+ExecStart=/usr/bin/python3 /opt/cqu-notice/notice_server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

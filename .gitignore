@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+
+.claude/
+.superpowers/
+
+tools/
+*.log
+*.err.log
+*.out.log
+*.zip
+
+page_analysis.txt
