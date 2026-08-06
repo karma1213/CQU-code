@@ -141,6 +141,50 @@ class BrowserFetchTest(unittest.TestCase):
             popen_kw={"start_new_session": True},
         )
 
+    def test_webdriver_service_prefers_cached_driver_before_selenium_manager(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory, ".cache", "selenium", "chromedriver", "150.0")
+            cache.mkdir(parents=True)
+            driver_path = cache / "chromedriver.exe"
+            driver_path.write_bytes(b"driver")
+            service_class = mock.Mock(return_value=object())
+            with (
+                mock.patch.object(browser_fetch.Path, "home", return_value=Path(directory)),
+                mock.patch.object(browser_fetch.shutil, "which", return_value=None),
+                mock.patch.dict(os.environ, {"CQU_WEBDRIVER": ""}, clear=False),
+            ):
+                browser_fetch._create_webdriver_service(service_class)
+            self.assertEqual(service_class.call_args.args[0], str(driver_path))
+
+    def test_launch_chrome_binds_debug_endpoint_to_loopback(self):
+        process = _FakeProcess()
+        with (
+            mock.patch.object(browser_fetch, "_find_binary", return_value="chrome.exe"),
+            mock.patch.object(browser_fetch.subprocess, "Popen", return_value=process) as popen,
+        ):
+            browser_fetch._launch_chrome(9223, Path("profile"), "about:blank")
+        command = popen.call_args.args[0]
+        self.assertIn("--remote-debugging-address=127.0.0.1", command)
+
+    def test_attach_retries_transient_chrome_driver_connection_failure(self):
+        session = browser_fetch.BrowserSession([], port=9223)
+        with (
+            mock.patch.object(
+                browser_fetch,
+                "_attach_driver",
+                side_effect=[
+                    browser_fetch.BrowserFetchError(
+                        "cannot connect to chrome at 127.0.0.1:9223 from chrome not reachable"
+                    ),
+                    None,
+                ],
+            ) as attach,
+            mock.patch.object(browser_fetch.time, "sleep") as sleep,
+        ):
+            session._attach()
+        self.assertEqual(attach.call_count, 2)
+        sleep.assert_called_once_with(0.5)
+
     def test_direct_driver_quit_failure_terminates_service_tree_before_stop(self):
         process = _FakeProcess(pid=1008)
         service = _FakeService(process=process)
@@ -201,7 +245,7 @@ class BrowserFetchTest(unittest.TestCase):
             browser_fetch,
             "_terminate_process_tree",
             side_effect=lambda owned: setattr(owned, "returncode", 0),
-        ) as terminate:
+        ) as terminate, mock.patch.object(session, "_wait_until_port_released"):
             session.close()
             session.close()
 

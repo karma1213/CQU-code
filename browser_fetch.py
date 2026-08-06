@@ -136,6 +136,7 @@ def _launch_chrome(
     command = [
         _find_binary(),
         f"--remote-debugging-port={port}",
+        "--remote-debugging-address=127.0.0.1",
         "--remote-allow-origins=*",
         "--no-first-run",
         "--no-default-browser-check",
@@ -288,6 +289,25 @@ def _create_webdriver_service(service_class):
         kwargs["popen_kw"] = {"start_new_session": True}
     if configured:
         return service_class(configured, **kwargs)
+
+    # Selenium Manager may perform network lookups on every attach.  A
+    # cached driver is already version-selected by Selenium Manager and is a
+    # reliable offline fallback; prefer it before starting another manager
+    # process.  ``shutil.which`` keeps system installations ahead of stale
+    # cache entries.
+    driver_path = shutil.which("chromedriver")
+    if driver_path:
+        return service_class(driver_path, **kwargs)
+    cache_root = Path.home() / ".cache" / "selenium" / "chromedriver"
+    if cache_root.is_dir():
+        candidates = [
+            path
+            for path in cache_root.rglob("chromedriver*")
+            if path.is_file() and path.name.lower() in {"chromedriver", "chromedriver.exe"}
+        ]
+        if candidates:
+            newest = max(candidates, key=lambda path: path.stat().st_mtime)
+            return service_class(str(newest), **kwargs)
     return service_class(**kwargs)
 
 
@@ -598,7 +618,30 @@ class BrowserSession:
                 self.warmup_errors[url] = str(exc)
 
     def _attach(self) -> None:
-        _attach_driver(self.port, self._register_driver_resource)
+        timeout = float(os.environ.get("CQU_BROWSER_ATTACH_TIMEOUT", "10"))
+        deadline = time.monotonic() + max(0.5, timeout)
+        while True:
+            try:
+                _attach_driver(self.port, self._register_driver_resource)
+                return
+            except BrowserFetchError as exc:
+                cause = exc.__cause__
+                detail = f"{exc} {cause or ''}".lower()
+                transient = any(
+                    marker in detail
+                    for marker in (
+                        "cannot connect to chrome",
+                        "chrome not reachable",
+                        "disconnected: not connected to devtools",
+                    )
+                )
+                if not transient:
+                    raise
+                if time.monotonic() >= deadline:
+                    raise BrowserFetchError(
+                        f"Chrome attach failed within {timeout:g}s: {exc}"
+                    ) from exc
+                time.sleep(0.5)
 
     def _register_driver_resource(self, driver, service, attached: bool) -> None:
         self.driver = driver
