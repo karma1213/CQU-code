@@ -2,1243 +2,1208 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重庆大学通知公告聚合</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>CQU 校务索引台 · 校务通知</title>
+<link rel="icon" href="cqu_notice.ico">
 <style>
-  :root {
-    --bg: #f6f3ee;
-    --bg-soft: #fbfaf7;
-    --surface: #ffffff;
-    --surface-2: #fff8f3;
-    --text: #1f2328;
-    --text2: #5f6672;
-    --text3: #8a919d;
-    --primary: #981b1e;
-    --primary-2: #c3262d;
-    --primary-hover: #7f1518;
-    --primary-soft: #fff1f0;
-    --gold: #b8892f;
-    --gold-soft: #fff6df;
-    --border: #e7ddd3;
-    --border-strong: #d6c8ba;
-    --radius: 12px;
-    --shadow: 0 8px 24px rgba(58, 45, 37, 0.08);
-    --shadow-lg: 0 16px 36px rgba(58, 45, 37, 0.13);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                 "Microsoft YaHei", "Helvetica Neue", sans-serif;
-    min-width:320px; color:var(--text); line-height:1.6;
-    background:linear-gradient(180deg, rgba(152,27,30,0.08), transparent 260px), var(--bg);
-  }
-  a { color:inherit; }
-  button, input, select { font:inherit; }
-  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-    outline:3px solid rgba(184,137,47,.35); outline-offset:2px;
-  }
-  .topbar {
-    color:#fff; border-bottom:4px solid var(--gold);
-    background:
-      linear-gradient(135deg, rgba(77,12,14,.96), rgba(152,27,30,.96) 48%, rgba(195,38,45,.96)),
-      radial-gradient(circle at 20% 0%, rgba(255,255,255,.25), transparent 34%);
-  }
-  .topbar-inner { max-width:1180px; margin:0 auto; padding:30px 18px 24px; }
-  .brand-row { display:flex; align-items:center; justify-content:space-between; gap:18px; }
-  .brand-mark {
-    width:48px; height:48px; border:1px solid rgba(255,255,255,.34); border-radius:50%;
-    display:grid; place-items:center; flex:0 0 auto; background:rgba(255,255,255,.12);
-    font-weight:800; letter-spacing:.03em;
-  }
-  .brand-copy { flex:1; min-width:0; }
-  .eyebrow { font-size:.78rem; opacity:.78; letter-spacing:.08em; text-transform:uppercase; }
-  h1 { font-size:clamp(1.45rem, 3vw, 2.35rem); line-height:1.15; margin-top:4px; font-weight:800; }
-  .topbar p { font-size:.95rem; opacity:.86; margin-top:8px; }
-  .topbar .meta { font-size:.78rem; opacity:.78; margin-top:14px; }
-  .meta-card {
-    min-width:210px; border:1px solid rgba(255,255,255,.25); border-radius:14px;
-    background:rgba(255,255,255,.1); padding:12px 14px; text-align:right;
-  }
-  .meta-card strong { display:block; font-size:1.65rem; line-height:1; }
-  .meta-card span { display:block; margin-top:6px; font-size:.78rem; opacity:.8; }
-  .container { max-width:1180px; margin:0 auto; padding:18px 14px 36px; }
-  .source-overview {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
-    gap:10px; margin:-2px 0 14px;
-  }
-  .source-chip {
-    min-height:60px; background:rgba(255,255,255,.82); border:1px solid var(--border);
-    border-radius:var(--radius); padding:10px 12px; box-shadow:0 4px 14px rgba(58,45,37,.05);
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-  }
-  .source-chip span { color:var(--text2); font-size:.78rem; line-height:1.35; }
-  .source-chip strong { color:var(--primary); font-size:1.25rem; font-variant-numeric:tabular-nums; }
-  .toolbar {
-    position:sticky; top:0; z-index:20; display:grid; grid-template-columns:minmax(220px, 1fr) auto;
-    gap:12px; align-items:center; margin-bottom:14px; padding:12px;
-    border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.92);
-    box-shadow:var(--shadow); backdrop-filter:blur(12px);
-  }
-  .filters { display:flex; gap:10px; flex-wrap:wrap; align-items:center; min-width:0; }
-  .search-wrap { position:relative; flex:1 1 260px; min-width:210px; }
-  .search-wrap svg {
-    position:absolute; left:12px; top:50%; transform:translateY(-50%);
-    width:18px; height:18px; color:var(--text3);
-  }
-  .search-input, .source-select {
-    width:100%; min-height:44px; border:1px solid var(--border-strong); border-radius:10px;
-    background:#fff; color:var(--text); padding:0 12px; transition:border-color .16s, box-shadow .16s;
-  }
-  .search-input { padding-left:38px; }
-  .search-input::placeholder { color:var(--text3); }
-  .source-select { flex:0 0 190px; cursor:pointer; }
-  .search-input:focus, .source-select:focus {
-    border-color:var(--primary); box-shadow:0 0 0 4px rgba(152,27,30,.08);
-  }
-  .toolbar-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
-  .segment {
-    display:flex; min-height:44px; padding:3px; gap:2px; border:1px solid var(--border);
-    border-radius:12px; background:var(--bg-soft);
-  }
-  .seg-btn {
-    border:0; background:transparent; color:var(--text2); border-radius:9px; padding:0 12px;
-    min-width:52px; cursor:pointer; font-weight:600; transition:background .16s, color .16s;
-  }
-  .seg-btn.active { background:var(--primary); color:#fff; }
-  .btn {
-    display:inline-flex; align-items:center; justify-content:center; gap:7px;
-    min-height:44px; padding:0 14px; border-radius:10px; font-size:.86rem;
-    border:1px solid transparent; cursor:pointer; text-decoration:none;
-    transition:background .15s, color .15s, border-color .15s, transform .15s; font-weight:650;
-  }
-  .btn svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; }
-  .btn-primary { background:var(--primary); color:#fff; }
-  .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
-  .btn-outline { background:var(--surface); color:var(--text2); border-color:var(--border-strong); }
-  .btn-outline:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-soft); }
-  .result-line { margin:0 2px 12px; color:var(--text2); font-size:.88rem; }
-  .result-line strong { color:var(--primary); font-variant-numeric:tabular-nums; }
-  .card {
-    background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);
-    margin-bottom:14px; overflow:hidden; border:1px solid var(--border);
-    transition:box-shadow .2s, transform .2s;
-  }
-  .card:hover { box-shadow:var(--shadow-lg); transform:translateY(-1px); }
-  .card.hidden, .notice-item.hidden { display:none; }
-  .card-header {
-    display:flex; justify-content:space-between; align-items:center; gap:12px;
-    padding:14px 18px; border-bottom:1px solid var(--border);
-    background:linear-gradient(90deg, var(--surface-2), #fff);
-  }
-  .card-title { font-size:1rem; font-weight:750; color:var(--text); }
-  .card-subtitle { margin-top:1px; color:var(--text3); font-size:.78rem; }
-  .card-count {
-    flex:0 0 auto; font-size:.78rem; color:var(--primary); font-weight:700;
-    background:var(--primary-soft); padding:4px 10px; border-radius:999px; border:1px solid rgba(152,27,30,.12);
-  }
-  .card-body { padding:0; }
-  .card-body.empty { padding:36px 20px; text-align:center; color:var(--text3); font-size:.9rem; }
-  .notice-item {
-    display:grid; grid-template-columns:44px minmax(0, 1fr); align-items:center;
-    min-height:58px; border-bottom:1px solid var(--border); transition:background .14s;
-  }
-  .notice-item:last-child { border-bottom:none; }
-  .notice-item:hover { background:var(--primary-soft); }
-  .notice-item.is-read .item-title { color:#7d8490; }
-  .notice-item.is-read time { opacity:.7; }
-  .notice-item.is-favorite { background:linear-gradient(90deg, var(--gold-soft), #fff 42%); }
-  .notice-item.is-new { box-shadow:inset 4px 0 0 var(--primary-2); }
-  .icon-btn {
-    width:44px; height:44px; border:0; background:transparent; cursor:pointer;
-    display:grid; place-items:center; color:var(--text3); transition:color .15s, transform .15s;
-  }
-  .icon-btn svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; }
-  .icon-btn:hover { color:var(--gold); transform:scale(1.06); }
-  .notice-item.is-favorite .favorite-btn { color:var(--gold); }
-  .notice-item.is-favorite .favorite-btn svg { fill:currentColor; }
-  .item-link {
-    min-width:0; min-height:58px; display:grid; grid-template-columns:96px minmax(0, 1fr) auto auto 20px;
-    align-items:center; gap:10px; padding:8px 14px 8px 0; text-decoration:none; color:var(--text);
-  }
-  .item-link time {
-    font-size:.78rem; color:var(--text2); background:var(--bg-soft); padding:4px 8px;
-    border-radius:8px; white-space:nowrap; text-align:center; font-feature-settings:"tnum";
-  }
-  .item-title {
-    min-width:0; font-size:.92rem; line-height:1.45;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-  }
-  .state-badge {
-    display:inline-flex; align-items:center; justify-content:center; min-height:24px;
-    padding:0 8px; border-radius:999px; font-size:.72rem; font-weight:700; white-space:nowrap;
-  }
-  .read-state { color:#48606f; background:#edf4f7; cursor:pointer; user-select:none; }
-  .read-state:hover { color:var(--primary); background:var(--primary-soft); }
-  .notice-item.is-read .read-state { color:#7d8490; background:#f1f2f4; }
-  .new-state { display:none; color:#fff; background:var(--primary-2); }
-  .notice-item.is-new .new-state { display:inline-flex; }
-  .item-arrow {
-    width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2;
-    color:var(--text3); opacity:.55; transition:opacity .12s, transform .12s;
-  }
-  .notice-item:hover .item-arrow { opacity:1; transform:translateX(3px); }
-  .empty-results {
-    display:none; text-align:center; padding:42px 16px; border:1px dashed var(--border-strong);
-    border-radius:var(--radius); color:var(--text2); background:rgba(255,255,255,.66);
-  }
-  .empty-results.show { display:block; }
-  .toast {
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-    background:#1f2328; color:#fff; padding:11px 22px; border-radius:12px;
-    font-size:.88rem; opacity:0; transition:opacity .24s, transform .24s;
-    pointer-events:none; z-index:999;
-  }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
-  footer { text-align:center; padding:20px 0 8px; font-size:.78rem; color:var(--text3); }
-  footer p + p { margin-top:2px; }
-  @media (max-width:900px) {
-    .brand-row { align-items:flex-start; }
-    .meta-card { display:none; }
-    .toolbar { grid-template-columns:1fr; }
-    .toolbar-actions { justify-content:flex-start; }
-  }
-  @media (max-width:640px) {
-    .topbar-inner { padding:22px 14px 18px; }
-    .brand-mark { width:40px; height:40px; font-size:.9rem; }
-    .container { padding:12px 10px 28px; }
-    .source-overview { grid-template-columns:1fr 1fr; }
-    .filters, .toolbar-actions { width:100%; }
-    .search-wrap, .source-select { flex:1 1 100%; min-width:0; }
-    .segment { width:100%; overflow:auto; }
-    .seg-btn { flex:1 0 auto; }
-    .btn { flex:1 1 auto; }
-    .card-header { padding:12px 14px; align-items:flex-start; }
-    .notice-item { grid-template-columns:42px minmax(0, 1fr); min-height:74px; }
-    .icon-btn { width:42px; height:52px; }
-    .item-link {
-      grid-template-columns:minmax(0, 1fr) auto auto;
-      grid-template-areas:"title title title" "date read arrow";
-      gap:6px 8px; min-height:74px; padding:9px 10px 9px 0;
-    }
-    .item-link time { grid-area:date; width:max-content; font-size:.72rem; }
-    .item-title { grid-area:title; font-size:.9rem; -webkit-line-clamp:3; }
-    .read-state { grid-area:read; }
-    .new-state { grid-area:read; transform:translateX(42px); }
-    .item-arrow { grid-area:arrow; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; }
-  }
+
+:root {
+  --cqu-crimson:#8b1e27;
+  --cqu-crimson-dark:#68151c;
+  --ink:#20262d;
+  --cool-paper:#f3f5f6;
+  --surface:#ffffff;
+  --steel:#d5dce1;
+  --steel-dark:#aeb9c1;
+  --academic-blue:#315e6d;
+  --muted:#66717a;
+  --success:#2f6b4f;
+  --warning:#8a5a12;
+  --focus:#176b87;
+  --display-font:"STZhongsong","Songti SC","Noto Serif CJK SC",serif;
+  --body-font:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --data-font:"Bahnschrift","Segoe UI",sans-serif;
+}
+* { box-sizing:border-box; }
+html { color-scheme:light; background:var(--cool-paper); }
+body {
+  min-width:320px;
+  margin:0;
+  color:var(--ink);
+  background:var(--cool-paper);
+  font-family:var(--body-font);
+  font-size:15px;
+  line-height:1.55;
+}
+button,input,select { font:inherit; }
+button,a,select,input { -webkit-tap-highlight-color:transparent; }
+a { color:inherit; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--focus) 55%,transparent);
+  outline-offset:2px;
+}
+.workspace-header {
+  position:relative;
+  z-index:30;
+  border-top:4px solid var(--cqu-crimson);
+  border-bottom:1px solid var(--steel);
+  background:var(--surface);
+}
+.workspace-header-inner {
+  width:min(1380px,calc(100% - 40px));
+  min-height:70px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(260px,1fr) auto auto;
+  align-items:center;
+  gap:22px;
+}
+.brand-lockup { min-width:0; display:flex; align-items:center; gap:12px; }
+.brand-lockup img { width:38px; height:38px; flex:0 0 auto; }
+.brand-copy { min-width:0; }
+.brand-copy h1 {
+  margin:0;
+  overflow-wrap:anywhere;
+  font-family:var(--display-font);
+  font-size:1.28rem;
+  font-weight:700;
+  line-height:1.2;
+}
+.brand-copy p { margin:3px 0 0; color:var(--muted); font-size:.78rem; }
+.page-switch {
+  display:flex;
+  align-items:center;
+  border:1px solid var(--steel);
+  border-radius:6px;
+  overflow:hidden;
+  background:var(--cool-paper);
+}
+.page-switch a {
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  padding:0 13px;
+  color:var(--muted);
+  text-decoration:none;
+  font-weight:650;
+  white-space:nowrap;
+}
+.page-switch a + a { border-left:1px solid var(--steel); }
+.page-switch a[aria-current="page"] { color:#fff; background:var(--cqu-crimson); }
+.header-meta { text-align:right; color:var(--muted); font-size:.75rem; }
+.header-meta strong {
+  display:block;
+  color:var(--ink);
+  font-family:var(--data-font);
+  font-size:.94rem;
+  font-weight:650;
+}
+.workspace-main { width:min(1380px,calc(100% - 40px)); margin:0 auto; padding:16px 0 28px; }
+.control-band {
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:grid;
+  grid-template-columns:minmax(260px,1fr) minmax(0,auto);
+  gap:12px;
+  align-items:center;
+  padding:10px 0 12px;
+  border-bottom:1px solid var(--steel);
+  background:color-mix(in srgb,var(--cool-paper) 94%,transparent);
+  backdrop-filter:blur(8px);
+}
+.control-primary,.control-secondary { display:flex; align-items:center; gap:8px; min-width:0; }
+.control-secondary { justify-content:flex-end; }
+.search-field { position:relative; flex:1 1 320px; min-width:180px; }
+.search-field > svg {
+  position:absolute;
+  left:11px;
+  top:50%;
+  width:18px;
+  height:18px;
+  color:var(--muted);
+  transform:translateY(-50%);
+  pointer-events:none;
+}
+.search-input,.filter-select {
+  width:100%;
+  min-height:40px;
+  border:1px solid var(--steel-dark);
+  border-radius:6px;
+  color:var(--ink);
+  background:var(--surface);
+}
+.search-input { padding:0 12px 0 38px; }
+.filter-select { width:auto; min-width:144px; padding:0 32px 0 10px; }
+.command-button,.icon-button,.state-button,.segment-button {
+  min-height:38px;
+  border:1px solid var(--steel-dark);
+  border-radius:6px;
+  color:var(--ink);
+  background:var(--surface);
+  cursor:pointer;
+  transition:background-color .16s,color .16s,border-color .16s,transform .16s;
+}
+.command-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 12px;
+  white-space:nowrap;
+  font-weight:650;
+}
+.command-button.primary { border-color:var(--cqu-crimson); color:#fff; background:var(--cqu-crimson); }
+.command-button:hover,.icon-button:hover,.state-button:hover,.segment-button:hover { border-color:var(--academic-blue); }
+.command-button.primary:hover { background:var(--cqu-crimson-dark); }
+.command-button:disabled { cursor:wait; opacity:.62; }
+.command-button svg,.icon-button svg { width:18px; height:18px; }
+.segment-control {
+  display:flex;
+  min-height:40px;
+  padding:2px;
+  gap:2px;
+  overflow-x:auto;
+  border:1px solid var(--steel);
+  border-radius:6px;
+  background:#e9edef;
+}
+.segment-button { border-color:transparent; padding:0 10px; color:var(--muted); background:transparent; white-space:nowrap; }
+.segment-button.active { color:#fff; border-color:var(--academic-blue); background:var(--academic-blue); }
+.segment-button span { margin-left:4px; font-family:var(--data-font); font-size:.74rem; }
+.workspace-grid {
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+  padding-top:16px;
+}
+.index-spine {
+  position:sticky;
+  top:78px;
+  min-width:0;
+  padding:4px 18px 8px 0;
+  border-right:2px solid var(--steel);
+}
+.index-spine h2 {
+  margin:0 0 9px;
+  color:var(--muted);
+  font-family:var(--display-font);
+  font-size:.94rem;
+}
+.source-index { display:grid; gap:2px; }
+.source-index-button {
+  position:relative;
+  width:100%;
+  min-height:42px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:5px 7px 5px 13px;
+  border:0;
+  color:var(--muted);
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+}
+.source-index-button::before {
+  content:"";
+  position:absolute;
+  left:-1px;
+  top:7px;
+  bottom:7px;
+  width:3px;
+  background:transparent;
+}
+.source-index-button:hover,.source-index-button.active { color:var(--ink); background:#e9edef; }
+.source-index-button.active::before { background:var(--cqu-crimson); }
+.source-index-name { min-width:0; overflow-wrap:anywhere; font-size:.82rem; line-height:1.3; }
+.source-index-count { color:var(--academic-blue); font-family:var(--data-font); font-size:.88rem; }
+.index-state { margin:12px 7px 0; color:var(--muted); font-size:.74rem; }
+.content-column { min-width:0; }
+.result-line { min-height:30px; margin:0; color:var(--muted); font-size:.84rem; }
+.result-line strong { color:var(--cqu-crimson); font-family:var(--data-font); }
+.source-errors {
+  margin:0 0 14px;
+  border:1px solid #d8b9ac;
+  border-left:4px solid var(--warning);
+  border-radius:4px;
+  background:#fffaf4;
+}
+.source-errors summary {
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  color:#68440e;
+  cursor:pointer;
+  font-weight:650;
+}
+.source-error-list { margin:0; padding:0 12px 10px 32px; color:var(--muted); font-size:.8rem; }
+.source-error-heading { margin:0; padding:2px 12px 5px; color:var(--ink); font-size:.8rem; font-weight:650; }
+.source-error-list li + li { margin-top:7px; }
+.source-error-name { display:block; color:var(--ink); font-weight:650; }
+.source-error-message { overflow-wrap:anywhere; }
+.notice-group,.news-feed { min-width:0; }
+.notice-group { padding:13px 0 7px; border-top:1px solid var(--steel); }
+.notice-group:first-of-type { border-top:2px solid var(--ink); }
+.group-heading {
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 4px;
+}
+.group-heading h2 { margin:0; font-family:var(--display-font); font-size:1rem; }
+.group-heading span { color:var(--muted); font-family:var(--data-font); font-size:.78rem; }
+.notice-list,.news-list { display:grid; }
+.notice-item,.news-item {
+  position:relative;
+  min-width:0;
+  border-bottom:1px solid var(--steel);
+  background:var(--surface);
+}
+.notice-item { display:grid; grid-template-columns:104px minmax(0,1fr) auto auto; align-items:center; gap:12px; padding:10px 8px; }
+.news-item { display:grid; grid-template-columns:34px minmax(0,1fr) auto; align-items:start; gap:10px; padding:13px 8px; }
+.notice-item.hidden,.news-item.hidden,.notice-group.hidden { display:none; }
+.notice-item.is-new,.news-item.is-new { box-shadow:inset 3px 0 var(--cqu-crimson); }
+.notice-item.is-favorite,.news-item.is-favorite { background:#fffbea; }
+.notice-item.is-read .item-title,.news-item.is-read .news-title { color:#75808a; }
+.item-date { color:var(--muted); font-family:var(--data-font); font-size:.78rem; white-space:nowrap; }
+.item-link,.news-title { min-width:0; color:var(--ink); text-decoration:none; }
+.item-title,.news-title { overflow-wrap:anywhere; font-weight:650; }
+.item-link:hover .item-title,.news-title:hover { color:var(--academic-blue); text-decoration:underline; text-underline-offset:3px; }
+.item-source,.news-meta { color:var(--muted); font-size:.74rem; }
+.icon-button { width:34px; min-height:34px; display:grid; place-items:center; padding:0; color:var(--muted); border-color:transparent; background:transparent; }
+.icon-button svg { fill:none; stroke:currentColor; stroke-width:1.8; }
+.is-favorite .favorite-button { color:var(--warning); }
+.is-favorite .favorite-button svg { fill:currentColor; }
+.state-button { min-height:30px; padding:0 8px; color:var(--academic-blue); font-size:.75rem; white-space:nowrap; }
+.news-main { min-width:0; }
+.news-meta { display:flex; flex-wrap:wrap; gap:5px 10px; margin-bottom:3px; }
+.news-title { display:block; font-family:var(--display-font); font-size:1rem; line-height:1.45; }
+.news-summary { margin:4px 0 0; color:var(--muted); font-size:.84rem; }
+.tag-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.tag { padding:1px 6px; border:1px solid var(--steel); border-radius:4px; color:var(--muted); font-size:.7rem; }
+.tag.hot { color:var(--cqu-crimson); border-color:#d7a7aa; }
+.empty-results {
+  display:none;
+  padding:28px 16px;
+  border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--steel);
+  color:var(--muted);
+  background:var(--surface);
+  text-align:center;
+}
+.empty-results.show,.empty-results[data-empty="true"] { display:block; }
+.empty-results strong { display:block; margin-bottom:4px; color:var(--ink); font-family:var(--display-font); font-size:1rem; }
+.empty-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:13px; }
+.toast {
+  position:fixed;
+  left:50%;
+  bottom:20px;
+  z-index:100;
+  max-width:min(460px,calc(100% - 28px));
+  padding:9px 14px;
+  border-radius:6px;
+  color:#fff;
+  background:var(--ink);
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,8px);
+  transition:opacity .16s,transform .16s;
+}
+.toast.show { opacity:1; transform:translate(-50%,0); }
+.page-footer { padding:20px 0 2px; color:var(--muted); font-size:.74rem; text-align:center; }
+@media (max-width:1120px) {
+  body[data-page="news"] .control-band { grid-template-columns:1fr; }
+  body[data-page="news"] .control-secondary { justify-content:flex-start; overflow-x:auto; }
+  body[data-page="news"] .index-spine { position:relative; top:auto; }
+}
+@media (max-width:980px) {
+  .workspace-header-inner { grid-template-columns:minmax(230px,1fr) auto; }
+  .header-meta { display:none; }
+  .control-band { grid-template-columns:1fr; }
+  .control-secondary { justify-content:flex-start; overflow-x:auto; }
+  .workspace-grid { grid-template-columns:180px minmax(0,1fr); gap:18px; }
+  .index-spine { position:relative; top:auto; }
+  .notice-item { grid-template-columns:86px minmax(0,1fr) auto; }
+  .notice-item .state-button { grid-column:2; justify-self:start; }
+}
+@media (max-width:700px) {
+  .workspace-header-inner,.workspace-main { width:min(100% - 24px,1380px); }
+  .workspace-header-inner { min-height:64px; grid-template-columns:1fr; gap:8px; padding:9px 0; }
+  .brand-lockup img { width:32px; height:32px; }
+  .brand-copy h1 { font-size:1.08rem; }
+  .brand-copy p { display:none; }
+  .page-switch { width:100%; }
+  .page-switch a { flex:1 1 50%; justify-content:center; min-height:34px; }
+  .workspace-main { padding-top:8px; }
+  .control-band { position:relative; top:auto; padding-top:0; }
+  .control-primary { flex-wrap:wrap; }
+  .search-field { flex-basis:100%; }
+  .filter-select { flex:1 1 130px; min-width:0; }
+  .control-secondary { width:100%; padding-bottom:2px; }
+  body[data-page="notices"] .control-secondary { flex-wrap:wrap; overflow:visible; }
+  body[data-page="notices"] #statusFilter { flex:1 0 100%; width:100%; overflow:visible; }
+  body[data-page="notices"] #statusFilter .segment-button { flex:1 1 25%; padding-inline:4px; }
+  .workspace-grid { grid-template-columns:1fr; gap:12px; padding-top:10px; }
+  .index-spine { position:relative; top:auto; padding:0 0 9px; border-right:0; border-bottom:2px solid var(--steel); overflow:hidden; }
+  .index-spine h2 { margin-bottom:5px; }
+  .source-index { display:flex; gap:4px; overflow-x:auto; padding-bottom:2px; }
+  .source-index-button { flex:0 0 145px; min-height:38px; padding:4px 7px 4px 10px; background:var(--surface); }
+  .source-index-button::before { left:0; top:5px; bottom:5px; }
+  .index-state { display:none; }
+  .notice-item { grid-template-columns:72px minmax(0,1fr) 32px; gap:7px; padding:10px 5px; }
+  .notice-item .state-button { grid-column:2; }
+  .item-source { display:none; }
+  .news-item { grid-template-columns:30px minmax(0,1fr); padding:11px 4px; }
+  .news-item > .state-button { grid-column:2; justify-self:start; }
+  .news-summary { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
+}
+
+
+  mark.hl { background:rgba(255,205,84,.55); color:inherit; border-radius:3px; padding:0 1px; }
+  .search-hint { font-size:.74rem; opacity:.72; margin-top:4px; }
+
+.notice-item-empty { padding:18px 8px; border-bottom:1px solid var(--steel); color:var(--muted); background:var(--surface); }
 </style>
 </head>
-<body>
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand-row">
-      <div class="brand-mark" aria-hidden="true">CQU</div>
+<body data-page="notices" data-refresh-label="通知">
+
+<header class="workspace-header">
+  <div class="workspace-header-inner">
+    <div class="brand-lockup">
+      <img src="cqu_notice.ico" alt="" width="38" height="38">
       <div class="brand-copy">
-        <div class="eyebrow">Chongqing University Notice Hub</div>
-        <h1>重庆大学通知公告聚合</h1>
-        <p>聚合校内多站点通知，支持收藏、已读与新增追踪。</p>
-        <div class="meta" id="updateMeta">更新于 2026-06-05 13:46:55 · 共 54 条通知</div>
-      </div>
-      <div class="meta-card" aria-label="通知总数">
-        <strong>54</strong>
-        <span>条通知已收录</span>
+        <h1>CQU 校务索引台</h1>
+        <p>重庆大学校务通知</p>
       </div>
     </div>
+    <nav class="page-switch" aria-label="页面切换">
+      <a href="index.html" data-page-target="notices" data-service-port="8765" aria-current="page">校务通知</a>
+      <a href="news.html" data-page-target="news" data-service-port="8766">国内新闻</a>
+    </nav>
+    <div class="header-meta"><strong>共 15 条通知</strong><span>更新于 2026-08-05 12:38:44</span></div>
   </div>
-</div>
-<div class="container">
-  <div class="source-overview" aria-label="来源概览">
-    
-        <div class="source-chip" data-source="civil">
-            <span>土木工程学院 — 通知公告</span>
-            <strong>9</strong>
-        </div>
-        <div class="source-chip" data-source="cqu">
-            <span>重庆大学 — 通知公告</span>
-            <strong>15</strong>
-        </div>
-        <div class="source-chip" data-source="xgb_xsgl">
-            <span>学工部 — 学生奖励</span>
-            <strong>10</strong>
-        </div>
-        <div class="source-chip" data-source="xgb_sizheng">
-            <span>学工部 — 思政教育</span>
-            <strong>10</strong>
-        </div>
-        <div class="source-chip" data-source="graduate">
-            <span>研究生院 — 通知公告</span>
-            <strong>10</strong>
-        </div>
-  </div>
-  <div class="toolbar">
-    <div class="filters">
-      <label class="search-wrap" aria-label="搜索通知">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.5 18a7.5 7.5 0 1 1 5.3-2.2L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input class="search-input" id="searchInput" type="search" placeholder="搜索标题关键词">
+</header>
+<main class="workspace-main">
+  <section class="control-band" aria-label="通知筛选与操作">
+    <div class="control-primary">
+      <label class="search-field" aria-label="搜索通知"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input class="search-input" id="searchInput" type="search"
+          placeholder="搜索标题、来源、日期或拼音" autocomplete="off">
       </label>
-      <select class="source-select" id="sourceFilter" aria-label="按来源筛选">
-        <option value="all">全部来源</option>
-<option value="civil">土木工程学院 — 通知公告</option>
-<option value="cqu">重庆大学 — 通知公告</option>
-<option value="xgb_xsgl">学工部 — 学生奖励</option>
-<option value="xgb_sizheng">学工部 — 思政教育</option>
-<option value="graduate">研究生院 — 通知公告</option>
+      <select class="filter-select" id="sourceFilter" aria-label="按来源筛选">
+        <option value="all">全部来源</option><option value="civil">土木工程学院 — 通知公告</option><option value="civil_gsgg">土木工程学院 — 公示公告</option><option value="cqu">重庆大学 — 通知公告</option><option value="xgb_xsgl">学工部 — 学生奖励</option><option value="xgb_sizheng">学工部 — 学生事务</option><option value="graduate">研究生院 — 通知公告</option>
       </select>
     </div>
-    <div class="toolbar-actions">
-      <div class="segment" role="tablist" aria-label="通知状态筛选">
-        <button class="seg-btn active" type="button" data-filter="all">全部</button>
-        <button class="seg-btn" type="button" data-filter="new">新通知</button>
-        <button class="seg-btn" type="button" data-filter="favorite">收藏</button>
-        <button class="seg-btn" type="button" data-filter="unread">未读</button>
+    <div class="control-secondary">
+      <div class="segment-control" id="statusFilter" aria-label="按状态筛选">
+        <button class="segment-button seg-btn active" type="button" data-filter="all" aria-pressed="true">全部</button>
+        <button class="segment-button seg-btn" type="button" data-filter="new" aria-pressed="false">新通知</button>
+        <button class="segment-button seg-btn" type="button" data-filter="favorite" aria-pressed="false">收藏</button>
+        <button class="segment-button seg-btn" type="button" data-filter="unread" aria-pressed="false">未读</button>
       </div>
-      <button class="btn btn-outline" type="button" onclick="markAllRead()">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
-        全部已读
-      </button>
-      <button class="btn btn-primary" type="button" onclick="doRefresh()">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.6 6.1M3 12A9 9 0 0 1 18.6 5.9M18 2v5h-5M6 22v-5h5"/></svg>
-        刷新
-      </button>
-      <a class="btn btn-outline" href="#" onclick="scrollToTop()">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>
-        顶部
-      </a>
+      <button class="command-button" type="button" id="markAllReadButton" onclick="markAllRead()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>全部已读</button>
+      <button class="command-button primary" id="refreshButton" type="button" onclick="doRefresh()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.9 4M4 12A8 8 0 0 1 18.9 8"/><path d="M20 4v4h-4M4 20v-4h4"/></svg><span>刷新</span></button>
+    </div>
+  </section>
+  <div class="workspace-grid">
+    <aside class="index-spine" aria-label="通知来源索引">
+      <h2>来源索引</h2>
+      <div class="source-index"><button class="source-index-button active" type="button" data-source-target="all" aria-pressed="true"><span class="source-index-name">全部通知</span><span class="source-index-count">15</span></button><button class="source-index-button" type="button" data-source-target="civil" aria-pressed="false"><span class="source-index-name">土木工程学院 — 通知公告</span><span class="source-index-count">0</span></button><button class="source-index-button" type="button" data-source-target="civil_gsgg" aria-pressed="false"><span class="source-index-name">土木工程学院 — 公示公告</span><span class="source-index-count">0</span></button><button class="source-index-button" type="button" data-source-target="cqu" aria-pressed="false"><span class="source-index-name">重庆大学 — 通知公告</span><span class="source-index-count">15</span></button><button class="source-index-button" type="button" data-source-target="xgb_xsgl" aria-pressed="false"><span class="source-index-name">学工部 — 学生奖励</span><span class="source-index-count">0</span></button><button class="source-index-button" type="button" data-source-target="xgb_sizheng" aria-pressed="false"><span class="source-index-name">学工部 — 学生事务</span><span class="source-index-count">0</span></button><button class="source-index-button" type="button" data-source-target="graduate" aria-pressed="false"><span class="source-index-name">研究生院 — 通知公告</span><span class="source-index-count">0</span></button></div>
+      <p class="index-state" id="indexState">当前查看全部来源</p>
+    </aside>
+    <div class="content-column">
+      <p class="result-line" id="resultLine" aria-live="polite">当前显示 <strong>15</strong> 条通知</p>
+<details class="source-errors" id="sourceErrors"><summary>5 个来源暂时不可用</summary><p class="source-error-heading">部分来源抓取失败</p><ul class="source-error-list"><li><span class="source-error-name">土木工程学院 — 通知公告</span><span class="source-error-message">常驻 Chrome attach 失败: Message: session not created: cannot connect to chrome at 127.0.0.1:9223
+from chrome not reachable; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff7065b0d25+155a5]
+	chromedriver!GetHandleVerifier [0x7ff7065b0d80+15600]
+	chromedriver!(No symbol) [0x7ff706105736]
+	chromedriver!(No symbol) [0x7ff7060f60ea]
+	chromedriver!(No symbol) [0x7ff70614e2db]
+	chromedriver!(No symbol) [0x7ff706142c59]
+	chromedriver!(No symbol) [0x7ff7061972e1]
+	chromedriver!(No symbol) [0x7ff706196b46]
+	chromedriver!(No symbol) [0x7ff706152e6c]
+	chromedriver!(No symbol) [0x7ff706153d93]
+	chromedriver!GetHandleVerifier [0x7ff706b96431+5facb1]
+	chromedriver!GetHandleVerifier [0x7ff706b90a9b+5f531b]
+	chromedriver!GetHandleVerifier [0x7ff706bb5865+61a0e5]
+	chromedriver!GetHandleVerifier [0x7ff7065cdace+3234e]
+	chromedriver!GetHandleVerifier [0x7ff7065d661c+3ae9c]
+	chromedriver!GetHandleVerifier [0x7ff7065bab74+1f3f4]
+	chromedriver!GetHandleVerifier [0x7ff7065bad04+1f584]
+	chromedriver!GetHandleVerifier [0x7ff70659d9d7+2257]
+	KERNEL32!BaseThreadInitThunk [0x7ffe5ba7e957+17]
+	ntdll!RtlUserThreadStart [0x7ffe5dd6ad6c+2c]
+</span></li><li><span class="source-error-name">土木工程学院 — 公示公告</span><span class="source-error-message">常驻 Chrome attach 失败: Message: session not created: cannot connect to chrome at 127.0.0.1:9223
+from chrome not reachable; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff7065b0d25+155a5]
+	chromedriver!GetHandleVerifier [0x7ff7065b0d80+15600]
+	chromedriver!(No symbol) [0x7ff706105736]
+	chromedriver!(No symbol) [0x7ff7060f60ea]
+	chromedriver!(No symbol) [0x7ff70614e2db]
+	chromedriver!(No symbol) [0x7ff706142c59]
+	chromedriver!(No symbol) [0x7ff7061972e1]
+	chromedriver!(No symbol) [0x7ff706196b46]
+	chromedriver!(No symbol) [0x7ff706152e6c]
+	chromedriver!(No symbol) [0x7ff706153d93]
+	chromedriver!GetHandleVerifier [0x7ff706b96431+5facb1]
+	chromedriver!GetHandleVerifier [0x7ff706b90a9b+5f531b]
+	chromedriver!GetHandleVerifier [0x7ff706bb5865+61a0e5]
+	chromedriver!GetHandleVerifier [0x7ff7065cdace+3234e]
+	chromedriver!GetHandleVerifier [0x7ff7065d661c+3ae9c]
+	chromedriver!GetHandleVerifier [0x7ff7065bab74+1f3f4]
+	chromedriver!GetHandleVerifier [0x7ff7065bad04+1f584]
+	chromedriver!GetHandleVerifier [0x7ff70659d9d7+2257]
+	KERNEL32!BaseThreadInitThunk [0x7ffe5ba7e957+17]
+	ntdll!RtlUserThreadStart [0x7ffe5dd6ad6c+2c]
+</span></li><li><span class="source-error-name">学工部 — 学生奖励</span><span class="source-error-message">常驻 Chrome attach 失败: Message: session not created: cannot connect to chrome at 127.0.0.1:9223
+from chrome not reachable; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff7065b0d25+155a5]
+	chromedriver!GetHandleVerifier [0x7ff7065b0d80+15600]
+	chromedriver!(No symbol) [0x7ff706105736]
+	chromedriver!(No symbol) [0x7ff7060f60ea]
+	chromedriver!(No symbol) [0x7ff70614e2db]
+	chromedriver!(No symbol) [0x7ff706142c59]
+	chromedriver!(No symbol) [0x7ff7061972e1]
+	chromedriver!(No symbol) [0x7ff706196b46]
+	chromedriver!(No symbol) [0x7ff706152e6c]
+	chromedriver!(No symbol) [0x7ff706153d93]
+	chromedriver!GetHandleVerifier [0x7ff706b96431+5facb1]
+	chromedriver!GetHandleVerifier [0x7ff706b90a9b+5f531b]
+	chromedriver!GetHandleVerifier [0x7ff706bb5865+61a0e5]
+	chromedriver!GetHandleVerifier [0x7ff7065cdace+3234e]
+	chromedriver!GetHandleVerifier [0x7ff7065d661c+3ae9c]
+	chromedriver!GetHandleVerifier [0x7ff7065bab74+1f3f4]
+	chromedriver!GetHandleVerifier [0x7ff7065bad04+1f584]
+	chromedriver!GetHandleVerifier [0x7ff70659d9d7+2257]
+	KERNEL32!BaseThreadInitThunk [0x7ffe5ba7e957+17]
+	ntdll!RtlUserThreadStart [0x7ffe5dd6ad6c+2c]
+</span></li><li><span class="source-error-name">学工部 — 学生事务</span><span class="source-error-message">常驻 Chrome attach 失败: Message: session not created: cannot connect to chrome at 127.0.0.1:9223
+from chrome not reachable; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff7065b0d25+155a5]
+	chromedriver!GetHandleVerifier [0x7ff7065b0d80+15600]
+	chromedriver!(No symbol) [0x7ff706105736]
+	chromedriver!(No symbol) [0x7ff7060f60ea]
+	chromedriver!(No symbol) [0x7ff70614e2db]
+	chromedriver!(No symbol) [0x7ff706142c59]
+	chromedriver!(No symbol) [0x7ff7061972e1]
+	chromedriver!(No symbol) [0x7ff706196b46]
+	chromedriver!(No symbol) [0x7ff706152e6c]
+	chromedriver!(No symbol) [0x7ff706153d93]
+	chromedriver!GetHandleVerifier [0x7ff706b96431+5facb1]
+	chromedriver!GetHandleVerifier [0x7ff706b90a9b+5f531b]
+	chromedriver!GetHandleVerifier [0x7ff706bb5865+61a0e5]
+	chromedriver!GetHandleVerifier [0x7ff7065cdace+3234e]
+	chromedriver!GetHandleVerifier [0x7ff7065d661c+3ae9c]
+	chromedriver!GetHandleVerifier [0x7ff7065bab74+1f3f4]
+	chromedriver!GetHandleVerifier [0x7ff7065bad04+1f584]
+	chromedriver!GetHandleVerifier [0x7ff70659d9d7+2257]
+	KERNEL32!BaseThreadInitThunk [0x7ffe5ba7e957+17]
+	ntdll!RtlUserThreadStart [0x7ffe5dd6ad6c+2c]
+</span></li><li><span class="source-error-name">研究生院 — 通知公告</span><span class="source-error-message">常驻 Chrome attach 失败: Message: session not created: cannot connect to chrome at 127.0.0.1:9223
+from chrome not reachable; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff7065b0d25+155a5]
+	chromedriver!GetHandleVerifier [0x7ff7065b0d80+15600]
+	chromedriver!(No symbol) [0x7ff706105736]
+	chromedriver!(No symbol) [0x7ff7060f60ea]
+	chromedriver!(No symbol) [0x7ff70614e2db]
+	chromedriver!(No symbol) [0x7ff706142c59]
+	chromedriver!(No symbol) [0x7ff7061972e1]
+	chromedriver!(No symbol) [0x7ff706196b46]
+	chromedriver!(No symbol) [0x7ff706152e6c]
+	chromedriver!(No symbol) [0x7ff706153d93]
+	chromedriver!GetHandleVerifier [0x7ff706b96431+5facb1]
+	chromedriver!GetHandleVerifier [0x7ff706b90a9b+5f531b]
+	chromedriver!GetHandleVerifier [0x7ff706bb5865+61a0e5]
+	chromedriver!GetHandleVerifier [0x7ff7065cdace+3234e]
+	chromedriver!GetHandleVerifier [0x7ff7065d661c+3ae9c]
+	chromedriver!GetHandleVerifier [0x7ff7065bab74+1f3f4]
+	chromedriver!GetHandleVerifier [0x7ff7065bad04+1f584]
+	chromedriver!GetHandleVerifier [0x7ff70659d9d7+2257]
+	KERNEL32!BaseThreadInitThunk [0x7ffe5ba7e957+17]
+	ntdll!RtlUserThreadStart [0x7ffe5dd6ad6c+2c]
+</span></li></ul></details>
+
+<section class="empty-results" id="emptyResults" aria-live="polite">
+  <strong>没有可显示的通知</strong>
+  <span>当前搜索或筛选条件没有结果。</span>
+  <div class="empty-actions">
+    <button class="command-button" type="button" data-action="clear-filters">清空筛选</button>
+    <button class="command-button primary" type="button" data-action="refresh"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.9 4M4 12A8 8 0 0 1 18.9 8"/><path d="M20 4v4h-4M4 20v-4h4"/></svg>重新刷新</button>
+  </div>
+</section>
+      <div id="noticeGroups">
+<section class="notice-group" data-source-group="civil">
+  <div class="group-heading"><h2>土木工程学院 — 通知公告</h2><span class="group-count">0 条</span></div>
+  <div class="notice-list"><div class="notice-item-empty">暂无通知</div></div>
+</section>
+<section class="notice-group" data-source-group="civil_gsgg">
+  <div class="group-heading"><h2>土木工程学院 — 公示公告</h2><span class="group-count">0 条</span></div>
+  <div class="notice-list"><div class="notice-item-empty">暂无通知</div></div>
+</section>
+<section class="notice-group" data-source-group="cqu">
+  <div class="group-heading"><h2>重庆大学 — 通知公告</h2><span class="group-count">15 条</span></div>
+  <div class="notice-list">
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/68291.htm" data-title="重庆大学关于公开招聘环境与生态学院院长的公告" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-08-03"
+  data-py="chong qing da xue guan yu|wei|xu gong kai zhao|qiao|shao pin|ping huan jing yu sheng tai xue yuan yuan zhang de|di gong gao|ju|gu"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-08-03">2026-08-03</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/68291.htm" target="_blank" rel="noopener">
+    <span class="item-title">重庆大学关于公开招聘环境与生态学院院长的公告</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/68231.htm" data-title="重庆大学关于公开招聘数学与统计学院院长的公告" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-07-28"
+  data-py="chong qing da xue guan yu|wei|xu gong kai zhao|qiao|shao pin|ping shu xue yu tong ji xue yuan yuan zhang de|di gong gao|ju|gu"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-07-28">2026-07-28</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/68231.htm" target="_blank" rel="noopener">
+    <span class="item-title">重庆大学关于公开招聘数学与统计学院院长的公告</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/68041.htm" data-title="关于2026年暑假后勤服务工作安排的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-07-13"
+  data-py="guan yu|wei|xu 2 0 2 6 nian|ning shu jia hou qin|qi fu wu gong zuo an pai de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-07-13">2026-07-13</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/68041.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于2026年暑假后勤服务工作安排的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/67781.htm" data-title="2026届毕业生授位照片下载通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-06-28"
+  data-py="2 0 2 6 jie bi ye sheng shou wei|li zhao pian xia zai tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-06-28">2026-06-28</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/67781.htm" target="_blank" rel="noopener">
+    <span class="item-title">2026届毕业生授位照片下载通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/67681.htm" data-title="关于推报参加第十五届“挑战杯”大学生创业计划竞赛参赛项目的公示" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-06-22"
+  data-py="guan yu|wei|xu tui bao can jia di shi wu jie ~ tiao zhan bei ~ da xue sheng chuang ye ji hua jing sai can sai xiang mu di gong shi|qi|zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-06-22">2026-06-22</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/67681.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于推报参加第十五届“挑战杯”大学生创业计划竞赛参赛项目的公示</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/67391.htm" data-title="关于开启2026年“助科研，促创新”知识产权信息服务科研团队征集的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-06-09"
+  data-py="guan yu|wei|xu kai qi 2 0 2 6 nian|ning ~ zhu|chu ke yan ~ cu|chuo chuang xin ~ zhi shi chan quan xin xi fu wu ke yan tuan|qiu dui zheng ji de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-06-09">2026-06-09</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/67391.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于开启2026年“助科研，促创新”知识产权信息服务科研团队征集的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66761.htm" data-title="关于举办2026（第三届）空间科学与技术国际学术研讨会（重庆会场）的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-05-11"
+  data-py="guan yu|wei|xu ju ban 2 0 2 6 ~ di san jie ~ kong jian ke xue yu ji shu guo ji xue shu yan tao hui|kuai ~ chong qing hui chang ~ de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-05-11">2026-05-11</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66761.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于举办2026（第三届）空间科学与技术国际学术研讨会（重庆会场）的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66741.htm" data-title="关于举办2026“外研社·国才杯”“理解当代中国”大学生外语能力大赛校赛的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-05-11"
+  data-py="guan yu|wei|xu ju ban 2 0 2 6 ~ wai yan|xing she ~ guo cai|zai bei ~ ~ li jie|xie dang dai zhong guo ~ da xue sheng wai yu neng li da sai xiao|jiao|qiao sai de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-05-11">2026-05-11</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66741.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于举办2026“外研社·国才杯”“理解当代中国”大学生外语能力大赛校赛的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66601.htm" data-title="关于举办2026重庆市大学生建造科普大赛暨第13届重庆大学建造季的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-05-06"
+  data-py="guan yu|wei|xu ju ban 2 0 2 6 chong qing shi|fu da xue sheng jian zao|cao ke pu da sai ji|jie di 1 3 jie chong qing da xue jian zao|cao ji de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-05-06">2026-05-06</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66601.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于举办2026重庆市大学生建造科普大赛暨第13届重庆大学建造季的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66541.htm" data-title="关于公布第31届“21世纪杯”全国英语演讲比赛重庆大学校选赛获奖名单的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-04-29"
+  data-py="guan yu|wei|xu gong bu di 3 1 jie ~ 2 1 shi ji bei ~ quan guo ying yu yan jiang bi|pi sai chong qing da xue xiao|jiao|qiao xuan sai huo jiang ming dan de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-04-29">2026-04-29</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66541.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于公布第31届“21世纪杯”全国英语演讲比赛重庆大学校选赛获奖名单的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66451.htm" data-title="关于推报参加第十五届“挑战杯”大学生创业计划竞赛重庆市选拔赛项目的公示" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-04-21"
+  data-py="guan yu|wei|xu tui bao can jia di shi wu jie ~ tiao zhan bei ~ da xue sheng chuang ye ji hua jing sai chong qing shi|fu xuan ba|bo|bie sai xiang mu di gong shi|qi|zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-04-21">2026-04-21</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66451.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于推报参加第十五届“挑战杯”大学生创业计划竞赛重庆市选拔赛项目的公示</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66261.htm" data-title="关于举办第六届“外教社·词达人杯”全国大学生英语词汇能力大赛的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-04-17"
+  data-py="guan yu|wei|xu ju ban di liu|lu jie ~ wai jiao she ~ ci da|ti|ta ren bei ~ quan guo da xue sheng ying yu ci hui neng li da sai de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-04-17">2026-04-17</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66261.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于举办第六届“外教社·词达人杯”全国大学生英语词汇能力大赛的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/66271.htm" data-title="关于参加“科学读书汇”（第四期）航天科普专场活动的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-04-16"
+  data-py="guan yu|wei|xu can jia ~ ke xue du shu hui ~ ~ di si qi|ji ~ hang tian ke pu zhuan chang huo|guo dong de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-04-16">2026-04-16</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66271.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于参加“科学读书汇”（第四期）航天科普专场活动的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/65641.htm" data-title="关于举办第31届“21世纪杯”全国英语演讲比赛重庆大学校赛的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-03-20"
+  data-py="guan yu|wei|xu ju ban di 3 1 jie ~ 2 1 shi ji bei ~ quan guo ying yu yan jiang bi|pi sai chong qing da xue xiao|jiao|qiao sai de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-03-20">2026-03-20</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65641.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于举办第31届“21世纪杯”全国英语演讲比赛重庆大学校赛的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article>
+<article class="notice-item" data-action-scope="notice"
+  data-url="https://www.cqu.edu.cn/info/1631/65591.htm" data-title="关于公布第28届“外研社•国才杯” 全国大学生英语辩论赛校选赛结果的通知" data-source="cqu"
+  data-sname="重庆大学 — 通知公告" data-date="2026-03-17"
+  data-py="guan yu|wei|xu gong bu di 2 8 jie ~ wai yan|xing she ~ guo cai|zai bei ~ ~ quan guo da xue sheng ying yu bian lun sai xiao|jiao|qiao xuan sai jie guo de|di tong zhi"
+  data-spy="chong qing da xue ~ ~ ~ tong zhi gong gao|ju|gu">
+  <time class="item-date" datetime="2026-03-17">2026-03-17</time>
+  <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65591.htm" target="_blank" rel="noopener">
+    <span class="item-title">关于公布第28届“外研社•国才杯” 全国大学生英语辩论赛校选赛结果的通知</span>
+    <span class="item-source">重庆大学 — 通知公告</span>
+  </a>
+  <button class="icon-button favorite-button favorite-btn" type="button"
+    data-action="favorite" aria-label="收藏通知" aria-pressed="false" title="收藏通知">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>
+  </button>
+  <button class="state-button read-state" type="button" data-action="read-toggle"
+    aria-label="标为已读" aria-pressed="false">未读</button>
+</article></div>
+</section>
+<section class="notice-group" data-source-group="xgb_xsgl">
+  <div class="group-heading"><h2>学工部 — 学生奖励</h2><span class="group-count">0 条</span></div>
+  <div class="notice-list"><div class="notice-item-empty">暂无通知</div></div>
+</section>
+<section class="notice-group" data-source-group="xgb_sizheng">
+  <div class="group-heading"><h2>学工部 — 学生事务</h2><span class="group-count">0 条</span></div>
+  <div class="notice-list"><div class="notice-item-empty">暂无通知</div></div>
+</section>
+<section class="notice-group" data-source-group="graduate">
+  <div class="group-heading"><h2>研究生院 — 通知公告</h2><span class="group-count">0 条</span></div>
+  <div class="notice-list"><div class="notice-item-empty">暂无通知</div></div>
+</section></div>
     </div>
   </div>
-  <div class="result-line" id="resultLine">当前显示 <strong>54</strong> 条通知</div>
-  <div class="empty-results" id="emptyResults">没有匹配的通知，换个关键词或筛选条件试试。</div>
-  
-        <section class="card" data-source="civil">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">土木工程学院 — 通知公告</h2>
-                    <p class="card-subtitle">已收录 9 条通知</p>
-                </div>
-                <div class="card-count" data-total="9">9 条</div>
-            </div>
-            <div class="card-body">
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/23656.htm" data-title="2026年本科生转专业土木工程学院工作实施细则" data-source="civil" data-date="2026-02-04">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/23656.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/23656.htm" data-title="2026年本科生转专业土木工程学院工作实施细则" data-source="civil" data-date="2026-02-04">
-                    <time datetime="2026-02-04">2026-02-04</time>
-                    <span class="item-title">2026年本科生转专业土木工程学院工作实施细则</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/20020.htm" data-title="2025年研究生国家奖学金推荐人选公示" data-source="civil" data-date="2025-10-14">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/20020.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/20020.htm" data-title="2025年研究生国家奖学金推荐人选公示" data-source="civil" data-date="2025-10-14">
-                    <time datetime="2025-10-14">2025-10-14</time>
-                    <span class="item-title">2025年研究生国家奖学金推荐人选公示</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/20018.htm" data-title="2025年硕士生学业奖学金等级公示" data-source="civil" data-date="2025-10-14">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/20018.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/20018.htm" data-title="2025年硕士生学业奖学金等级公示" data-source="civil" data-date="2025-10-14">
-                    <time datetime="2025-10-14">2025-10-14</time>
-                    <span class="item-title">2025年硕士生学业奖学金等级公示</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/18984.htm" data-title="2025年硕士研究生学业奖学金评审通知" data-source="civil" data-date="2025-09-30">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/18984.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/18984.htm" data-title="2025年硕士研究生学业奖学金评审通知" data-source="civil" data-date="2025-09-30">
-                    <time datetime="2025-09-30">2025-09-30</time>
-                    <span class="item-title">2025年硕士研究生学业奖学金评审通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/17709.htm" data-title="土木工程学院关于开展2025年研究生国家奖学金评审工作的通知" data-source="civil" data-date="2025-09-24">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/17709.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/17709.htm" data-title="土木工程学院关于开展2025年研究生国家奖学金评审工作的通知" data-source="civil" data-date="2025-09-24">
-                    <time datetime="2025-09-24">2025-09-24</time>
-                    <span class="item-title">土木工程学院关于开展2025年研究生国家奖学金评审工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/17681.htm" data-title="土木工程学院2026级推免研究生招生预报名系统关闭通知" data-source="civil" data-date="2025-09-08">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/17681.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/17681.htm" data-title="土木工程学院2026级推免研究生招生预报名系统关闭通知" data-source="civil" data-date="2025-09-08">
-                    <time datetime="2025-09-08">2025-09-08</time>
-                    <span class="item-title">土木工程学院2026级推免研究生招生预报名系统关闭通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/17713.htm" data-title="山区土木工程安全与韧性全国重点实验室 2025年度开放基金申请指南" data-source="civil" data-date="2025-08-25">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/17713.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/17713.htm" data-title="山区土木工程安全与韧性全国重点实验室 2025年度开放基金申请指南" data-source="civil" data-date="2025-08-25">
-                    <time datetime="2025-08-25">2025-08-25</time>
-                    <span class="item-title">山区土木工程安全与韧性全国重点实验室 2025年度开放基金申请指南</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/17673.htm" data-title="土木工程学院2025年“研路有你”线上学术交流活动学术之星名单公示" data-source="civil" data-date="2025-08-12">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/17673.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/17673.htm" data-title="土木工程学院2025年“研路有你”线上学术交流活动学术之星名单公示" data-source="civil" data-date="2025-08-12">
-                    <time datetime="2025-08-12">2025-08-12</time>
-                    <span class="item-title">土木工程学院2025年“研路有你”线上学术交流活动学术之星名单公示</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://civil.cqu.edu.cn/info/1327/17632.htm" data-title="山区土木工程安全与韧性全国重点实验室无行政级别副主任遴选通知" data-source="civil" data-date="2025-07-20">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://civil.cqu.edu.cn/info/1327/17632.htm" target="_blank" rel="noopener" data-url="https://civil.cqu.edu.cn/info/1327/17632.htm" data-title="山区土木工程安全与韧性全国重点实验室无行政级别副主任遴选通知" data-source="civil" data-date="2025-07-20">
-                    <time datetime="2025-07-20">2025-07-20</time>
-                    <span class="item-title">山区土木工程安全与韧性全国重点实验室无行政级别副主任遴选通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            </div>
-        </section>
-        <section class="card" data-source="cqu">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">重庆大学 — 通知公告</h2>
-                    <p class="card-subtitle">已收录 15 条通知</p>
-                </div>
-                <div class="card-count" data-total="15">15 条</div>
-            </div>
-            <div class="card-body">
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66761.htm" data-title="关于举办2026（第三届）空间科学与技术国际学术研讨会（重庆会场）的通知" data-source="cqu" data-date="2026-05-11">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66761.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66761.htm" data-title="关于举办2026（第三届）空间科学与技术国际学术研讨会（重庆会场）的通知" data-source="cqu" data-date="2026-05-11">
-                    <time datetime="2026-05-11">2026-05-11</time>
-                    <span class="item-title">关于举办2026（第三届）空间科学与技术国际学术研讨会（重庆会场）的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66741.htm" data-title="关于举办2026“外研社·国才杯”“理解当代中国”大学生外语能力大赛校赛的通知" data-source="cqu" data-date="2026-05-11">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66741.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66741.htm" data-title="关于举办2026“外研社·国才杯”“理解当代中国”大学生外语能力大赛校赛的通知" data-source="cqu" data-date="2026-05-11">
-                    <time datetime="2026-05-11">2026-05-11</time>
-                    <span class="item-title">关于举办2026“外研社·国才杯”“理解当代中国”大学生外语能力大赛校赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66601.htm" data-title="关于举办2026重庆市大学生建造科普大赛暨第13届重庆大学建造季的通知" data-source="cqu" data-date="2026-05-06">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66601.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66601.htm" data-title="关于举办2026重庆市大学生建造科普大赛暨第13届重庆大学建造季的通知" data-source="cqu" data-date="2026-05-06">
-                    <time datetime="2026-05-06">2026-05-06</time>
-                    <span class="item-title">关于举办2026重庆市大学生建造科普大赛暨第13届重庆大学建造季的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66541.htm" data-title="关于公布第31届“21世纪杯”全国英语演讲比赛重庆大学校选赛获奖名单的通知" data-source="cqu" data-date="2026-04-29">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66541.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66541.htm" data-title="关于公布第31届“21世纪杯”全国英语演讲比赛重庆大学校选赛获奖名单的通知" data-source="cqu" data-date="2026-04-29">
-                    <time datetime="2026-04-29">2026-04-29</time>
-                    <span class="item-title">关于公布第31届“21世纪杯”全国英语演讲比赛重庆大学校选赛获奖名单的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66451.htm" data-title="关于推报参加第十五届“挑战杯”大学生创业计划竞赛重庆市选拔赛项目的公示" data-source="cqu" data-date="2026-04-21">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66451.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66451.htm" data-title="关于推报参加第十五届“挑战杯”大学生创业计划竞赛重庆市选拔赛项目的公示" data-source="cqu" data-date="2026-04-21">
-                    <time datetime="2026-04-21">2026-04-21</time>
-                    <span class="item-title">关于推报参加第十五届“挑战杯”大学生创业计划竞赛重庆市选拔赛项目的公示</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66261.htm" data-title="关于举办第六届“外教社·词达人杯”全国大学生英语词汇能力大赛的通知" data-source="cqu" data-date="2026-04-17">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66261.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66261.htm" data-title="关于举办第六届“外教社·词达人杯”全国大学生英语词汇能力大赛的通知" data-source="cqu" data-date="2026-04-17">
-                    <time datetime="2026-04-17">2026-04-17</time>
-                    <span class="item-title">关于举办第六届“外教社·词达人杯”全国大学生英语词汇能力大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/66271.htm" data-title="关于参加“科学读书汇”（第四期）航天科普专场活动的通知" data-source="cqu" data-date="2026-04-16">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/66271.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/66271.htm" data-title="关于参加“科学读书汇”（第四期）航天科普专场活动的通知" data-source="cqu" data-date="2026-04-16">
-                    <time datetime="2026-04-16">2026-04-16</time>
-                    <span class="item-title">关于参加“科学读书汇”（第四期）航天科普专场活动的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65641.htm" data-title="关于举办第31届“21世纪杯”全国英语演讲比赛重庆大学校赛的通知" data-source="cqu" data-date="2026-03-20">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65641.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65641.htm" data-title="关于举办第31届“21世纪杯”全国英语演讲比赛重庆大学校赛的通知" data-source="cqu" data-date="2026-03-20">
-                    <time datetime="2026-03-20">2026-03-20</time>
-                    <span class="item-title">关于举办第31届“21世纪杯”全国英语演讲比赛重庆大学校赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65591.htm" data-title="关于公布第28届“外研社•国才杯” 全国大学生英语辩论赛校选赛结果的通知" data-source="cqu" data-date="2026-03-17">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65591.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65591.htm" data-title="关于公布第28届“外研社•国才杯” 全国大学生英语辩论赛校选赛结果的通知" data-source="cqu" data-date="2026-03-17">
-                    <time datetime="2026-03-17">2026-03-17</time>
-                    <span class="item-title">关于公布第28届“外研社•国才杯” 全国大学生英语辩论赛校选赛结果的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65341.htm" data-title="关于新学期沙坪坝校区穿梭巴士具体班次的通知" data-source="cqu" data-date="2026-02-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65341.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65341.htm" data-title="关于新学期沙坪坝校区穿梭巴士具体班次的通知" data-source="cqu" data-date="2026-02-28">
-                    <time datetime="2026-02-28">2026-02-28</time>
-                    <span class="item-title">关于新学期沙坪坝校区穿梭巴士具体班次的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65301.htm" data-title="重庆大学交通车时刻表" data-source="cqu" data-date="2026-02-26">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65301.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65301.htm" data-title="重庆大学交通车时刻表" data-source="cqu" data-date="2026-02-26">
-                    <time datetime="2026-02-26">2026-02-26</time>
-                    <span class="item-title">重庆大学交通车时刻表</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65181.htm" data-title="重庆大学2025-2026学年寒假交通车时刻表" data-source="cqu" data-date="2026-02-03">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65181.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65181.htm" data-title="重庆大学2025-2026学年寒假交通车时刻表" data-source="cqu" data-date="2026-02-03">
-                    <time datetime="2026-02-03">2026-02-03</time>
-                    <span class="item-title">重庆大学2025-2026学年寒假交通车时刻表</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/65061.htm" data-title="关于2026年寒假后勤服务工作安排的通知" data-source="cqu" data-date="2026-01-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/65061.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/65061.htm" data-title="关于2026年寒假后勤服务工作安排的通知" data-source="cqu" data-date="2026-01-28">
-                    <time datetime="2026-01-28">2026-01-28</time>
-                    <span class="item-title">关于2026年寒假后勤服务工作安排的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/64991.htm" data-title="关于征集2026年度全国科创科普作品的通知" data-source="cqu" data-date="2026-01-22">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/64991.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/64991.htm" data-title="关于征集2026年度全国科创科普作品的通知" data-source="cqu" data-date="2026-01-22">
-                    <time datetime="2026-01-22">2026-01-22</time>
-                    <span class="item-title">关于征集2026年度全国科创科普作品的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://www.cqu.edu.cn/info/1631/64881.htm" data-title="关于公布2025年新闻宣传工作积分的通知" data-source="cqu" data-date="2026-01-16">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://www.cqu.edu.cn/info/1631/64881.htm" target="_blank" rel="noopener" data-url="https://www.cqu.edu.cn/info/1631/64881.htm" data-title="关于公布2025年新闻宣传工作积分的通知" data-source="cqu" data-date="2026-01-16">
-                    <time datetime="2026-01-16">2026-01-16</time>
-                    <span class="item-title">关于公布2025年新闻宣传工作积分的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            </div>
-        </section>
-        <section class="card" data-source="xgb_xsgl">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">学工部 — 学生奖励</h2>
-                    <p class="card-subtitle">已收录 10 条通知</p>
-                </div>
-                <div class="card-count" data-total="10">10 条</div>
-            </div>
-            <div class="card-body">
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/5229.htm" data-title="关于公布2024—2025学年本科生国家奖学金获奖名单的通知" data-source="xgb_xsgl" data-date="2025-12-30">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/5229.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/5229.htm" data-title="关于公布2024—2025学年本科生国家奖学金获奖名单的通知" data-source="xgb_xsgl" data-date="2025-12-30">
-                    <time datetime="2025-12-30">2025-12-30</time>
-                    <span class="item-title">关于公布2024—2025学年本科生国家奖学金获奖名单的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/5149.htm" data-title="关于表彰重庆大学2024—2025学年学生争先创优年度人物、十佳先进班集体等先进个人、先进集体的决定" data-source="xgb_xsgl" data-date="2025-12-02">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/5149.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/5149.htm" data-title="关于表彰重庆大学2024—2025学年学生争先创优年度人物、十佳先进班集体等先进个人、先进集体的决定" data-source="xgb_xsgl" data-date="2025-12-02">
-                    <time datetime="2025-12-02">2025-12-02</time>
-                    <span class="item-title">关于表彰重庆大学2024—2025学年学生争先创优年度人物、十佳先进班集体等先进个人、先进集体的决定</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/4784.htm" data-title="关于做好2024—2025学年学生争先创优评选工作的通知" data-source="xgb_xsgl" data-date="2025-09-26">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/4784.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/4784.htm" data-title="关于做好2024—2025学年学生争先创优评选工作的通知" data-source="xgb_xsgl" data-date="2025-09-26">
-                    <time datetime="2025-09-26">2025-09-26</time>
-                    <span class="item-title">关于做好2024—2025学年学生争先创优评选工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/4764.htm" data-title="关于组织开展2024—2025学年第二学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2025-09-16">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/4764.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/4764.htm" data-title="关于组织开展2024—2025学年第二学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2025-09-16">
-                    <time datetime="2025-09-16">2025-09-16</time>
-                    <span class="item-title">关于组织开展2024—2025学年第二学期优秀学生综合奖学金评选工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/4040.htm" data-title="关于开展2025年重庆市普通高校学生先进评选活动的通知" data-source="xgb_xsgl" data-date="2025-04-07">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/4040.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/4040.htm" data-title="关于开展2025年重庆市普通高校学生先进评选活动的通知" data-source="xgb_xsgl" data-date="2025-04-07">
-                    <time datetime="2025-04-07">2025-04-07</time>
-                    <span class="item-title">关于开展2025年重庆市普通高校学生先进评选活动的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/3953.htm" data-title="关于组织开展2024—2025学年第一学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2025-03-04">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/3953.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/3953.htm" data-title="关于组织开展2024—2025学年第一学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2025-03-04">
-                    <time datetime="2025-03-04">2025-03-04</time>
-                    <span class="item-title">关于组织开展2024—2025学年第一学期优秀学生综合奖学金评选工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/3809.htm" data-title="关于表彰2023-2024学年第二学期优秀学生综合奖学金获奖者的决定" data-source="xgb_xsgl" data-date="2024-11-04">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/3809.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/3809.htm" data-title="关于表彰2023-2024学年第二学期优秀学生综合奖学金获奖者的决定" data-source="xgb_xsgl" data-date="2024-11-04">
-                    <time datetime="2024-11-04">2024-11-04</time>
-                    <span class="item-title">关于表彰2023-2024学年第二学期优秀学生综合奖学金获奖者的决定</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/3794.htm" data-title="关于做好2024年国家奖助学金评选工作的补充通知" data-source="xgb_xsgl" data-date="2024-10-31">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/3794.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/3794.htm" data-title="关于做好2024年国家奖助学金评选工作的补充通知" data-source="xgb_xsgl" data-date="2024-10-31">
-                    <time datetime="2024-10-31">2024-10-31</time>
-                    <span class="item-title">关于做好2024年国家奖助学金评选工作的补充通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/3676.htm" data-title="关于做好2023-2024学年学生争先创优评选工作的通知" data-source="xgb_xsgl" data-date="2024-09-18">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/3676.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/3676.htm" data-title="关于做好2023-2024学年学生争先创优评选工作的通知" data-source="xgb_xsgl" data-date="2024-09-18">
-                    <time datetime="2024-09-18">2024-09-18</time>
-                    <span class="item-title">关于做好2023-2024学年学生争先创优评选工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1006/3671.htm" data-title="关于组织开展2023-2024学年第二学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2024-09-18">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1006/3671.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1006/3671.htm" data-title="关于组织开展2023-2024学年第二学期优秀学生综合奖学金评选工作的通知" data-source="xgb_xsgl" data-date="2024-09-18">
-                    <time datetime="2024-09-18">2024-09-18</time>
-                    <span class="item-title">关于组织开展2023-2024学年第二学期优秀学生综合奖学金评选工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            </div>
-        </section>
-        <section class="card" data-source="xgb_sizheng">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">学工部 — 思政教育</h2>
-                    <p class="card-subtitle">已收录 10 条通知</p>
-                </div>
-                <div class="card-count" data-total="10">10 条</div>
-            </div>
-            <div class="card-body">
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3980.htm" data-title="关于2025年3月毕业研究生办理离校手续的通知" data-source="xgb_sizheng" data-date="2025-03-17">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3980.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3980.htm" data-title="关于2025年3月毕业研究生办理离校手续的通知" data-source="xgb_sizheng" data-date="2025-03-17">
-                    <time datetime="2025-03-17">2025-03-17</time>
-                    <span class="item-title">关于2025年3月毕业研究生办理离校手续的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3897.htm" data-title="关于2024年12月毕业研究生办理离校手续的通知" data-source="xgb_sizheng" data-date="2024-12-17">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3897.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3897.htm" data-title="关于2024年12月毕业研究生办理离校手续的通知" data-source="xgb_sizheng" data-date="2024-12-17">
-                    <time datetime="2024-12-17">2024-12-17</time>
-                    <span class="item-title">关于2024年12月毕业研究生办理离校手续的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3791.htm" data-title="关于重庆大学2024年研究生国家奖学金获奖学生名单的公示" data-source="xgb_sizheng" data-date="2024-10-29">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3791.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3791.htm" data-title="关于重庆大学2024年研究生国家奖学金获奖学生名单的公示" data-source="xgb_sizheng" data-date="2024-10-29">
-                    <time datetime="2024-10-29">2024-10-29</time>
-                    <span class="item-title">关于重庆大学2024年研究生国家奖学金获奖学生名单的公示</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3698.htm" data-title="关于开展重庆大学2024年研究生国家奖学金评审工作的通知" data-source="xgb_sizheng" data-date="2024-09-23">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3698.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3698.htm" data-title="关于开展重庆大学2024年研究生国家奖学金评审工作的通知" data-source="xgb_sizheng" data-date="2024-09-23">
-                    <time datetime="2024-09-23">2024-09-23</time>
-                    <span class="item-title">关于开展重庆大学2024年研究生国家奖学金评审工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3696.htm" data-title="关于开展重庆大学2024年硕士研究生学业奖学金评审工作的通知" data-source="xgb_sizheng" data-date="2024-09-23">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3696.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3696.htm" data-title="关于开展重庆大学2024年硕士研究生学业奖学金评审工作的通知" data-source="xgb_sizheng" data-date="2024-09-23">
-                    <time datetime="2024-09-23">2024-09-23</time>
-                    <span class="item-title">关于开展重庆大学2024年硕士研究生学业奖学金评审工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3654.htm" data-title="关于做好2024-2025学年第一学期研究生助管、德育助理岗位申报工作的通知" data-source="xgb_sizheng" data-date="2024-09-11">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3654.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3654.htm" data-title="关于做好2024-2025学年第一学期研究生助管、德育助理岗位申报工作的通知" data-source="xgb_sizheng" data-date="2024-09-11">
-                    <time datetime="2024-09-11">2024-09-11</time>
-                    <span class="item-title">关于做好2024-2025学年第一学期研究生助管、德育助理岗位申报工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3538.htm" data-title="关于做好2023-2024学年第二学期研究生助管、德育助理岗位考核工作的通知" data-source="xgb_sizheng" data-date="2024-07-01">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3538.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3538.htm" data-title="关于做好2023-2024学年第二学期研究生助管、德育助理岗位考核工作的通知" data-source="xgb_sizheng" data-date="2024-07-01">
-                    <time datetime="2024-07-01">2024-07-01</time>
-                    <span class="item-title">关于做好2023-2024学年第二学期研究生助管、德育助理岗位考核工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3178.htm" data-title="关于做好2023-2024学年第二学期研究生助管、德育助理岗位申报工作的通知" data-source="xgb_sizheng" data-date="2024-03-01">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3178.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3178.htm" data-title="关于做好2023-2024学年第二学期研究生助管、德育助理岗位申报工作的通知" data-source="xgb_sizheng" data-date="2024-03-01">
-                    <time datetime="2024-03-01">2024-03-01</time>
-                    <span class="item-title">关于做好2023-2024学年第二学期研究生助管、德育助理岗位申报工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3077.htm" data-title="关于做好2023-2024学年第一学期研究生助管、 德育助理岗位考核工作的通知" data-source="xgb_sizheng" data-date="2023-12-20">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3077.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3077.htm" data-title="关于做好2023-2024学年第一学期研究生助管、 德育助理岗位考核工作的通知" data-source="xgb_sizheng" data-date="2023-12-20">
-                    <time datetime="2023-12-20">2023-12-20</time>
-                    <span class="item-title">关于做好2023-2024学年第一学期研究生助管、 德育助理岗位考核工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://xgb.cqu.edu.cn/info/1005/3046.htm" data-title="关于2023年12月毕业（结业、肄业）研究生电子离校工作的通知" data-source="xgb_sizheng" data-date="2023-12-13">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://xgb.cqu.edu.cn/info/1005/3046.htm" target="_blank" rel="noopener" data-url="https://xgb.cqu.edu.cn/info/1005/3046.htm" data-title="关于2023年12月毕业（结业、肄业）研究生电子离校工作的通知" data-source="xgb_sizheng" data-date="2023-12-13">
-                    <time datetime="2023-12-13">2023-12-13</time>
-                    <span class="item-title">关于2023年12月毕业（结业、肄业）研究生电子离校工作的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            </div>
-        </section>
-        <section class="card" data-source="graduate">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">研究生院 — 通知公告</h2>
-                    <p class="card-subtitle">已收录 10 条通知</p>
-                </div>
-                <div class="card-count" data-total="10">10 条</div>
-            </div>
-            <div class="card-body">
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19146.htm" data-title="关于举办第五届中国研究生金融科技创新大赛的通知" data-source="graduate" data-date="2026-05-29">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19146.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19146.htm" data-title="关于举办第五届中国研究生金融科技创新大赛的通知" data-source="graduate" data-date="2026-05-29">
-                    <time datetime="2026-05-29">2026-05-29</time>
-                    <span class="item-title">关于举办第五届中国研究生金融科技创新大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19139.htm" data-title="关于举办第三届中国研究生“文化中国”两创大赛的通知" data-source="graduate" data-date="2026-05-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19139.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19139.htm" data-title="关于举办第三届中国研究生“文化中国”两创大赛的通知" data-source="graduate" data-date="2026-05-28">
-                    <time datetime="2026-05-28">2026-05-28</time>
-                    <span class="item-title">关于举办第三届中国研究生“文化中国”两创大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19137.htm" data-title="关于举办第三届中国研究生国际中文教育案例大赛的通知" data-source="graduate" data-date="2026-05-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19137.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19137.htm" data-title="关于举办第三届中国研究生国际中文教育案例大赛的通知" data-source="graduate" data-date="2026-05-28">
-                    <time datetime="2026-05-28">2026-05-28</time>
-                    <span class="item-title">关于举办第三届中国研究生国际中文教育案例大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19135.htm" data-title="关于举办第八届中国研究生人工智能创新大赛的通知" data-source="graduate" data-date="2026-05-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19135.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19135.htm" data-title="关于举办第八届中国研究生人工智能创新大赛的通知" data-source="graduate" data-date="2026-05-28">
-                    <time datetime="2026-05-28">2026-05-28</time>
-                    <span class="item-title">关于举办第八届中国研究生人工智能创新大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19128.htm" data-title="关于举办第二届中国研究生智能建造创新大赛的通知" data-source="graduate" data-date="2026-05-25">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19128.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19128.htm" data-title="关于举办第二届中国研究生智能建造创新大赛的通知" data-source="graduate" data-date="2026-05-25">
-                    <time datetime="2026-05-25">2026-05-25</time>
-                    <span class="item-title">关于举办第二届中国研究生智能建造创新大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19117.htm" data-title="关于举办“华为杯”第二十三届中国研究生数学建模竞赛的通知" data-source="graduate" data-date="2026-05-14">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19117.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19117.htm" data-title="关于举办“华为杯”第二十三届中国研究生数学建模竞赛的通知" data-source="graduate" data-date="2026-05-14">
-                    <time datetime="2026-05-14">2026-05-14</time>
-                    <span class="item-title">关于举办“华为杯”第二十三届中国研究生数学建模竞赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19038.htm" data-title="关于举办第二十一届中国研究生电子设计竞赛的通知" data-source="graduate" data-date="2026-04-09">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19038.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19038.htm" data-title="关于举办第二十一届中国研究生电子设计竞赛的通知" data-source="graduate" data-date="2026-04-09">
-                    <time datetime="2026-04-09">2026-04-09</time>
-                    <span class="item-title">关于举办第二十一届中国研究生电子设计竞赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19033.htm" data-title="关于2026年清明节、劳动节、端午节放假研究生教学工作安排的通知" data-source="graduate" data-date="2026-04-03">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19033.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19033.htm" data-title="关于2026年清明节、劳动节、端午节放假研究生教学工作安排的通知" data-source="graduate" data-date="2026-04-03">
-                    <time datetime="2026-04-03">2026-04-03</time>
-                    <span class="item-title">关于2026年清明节、劳动节、端午节放假研究生教学工作安排的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/19024.htm" data-title="关于举办“华为杯”第九届中国研究生创“芯”大赛的通知" data-source="graduate" data-date="2026-03-28">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/19024.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/19024.htm" data-title="关于举办“华为杯”第九届中国研究生创“芯”大赛的通知" data-source="graduate" data-date="2026-03-28">
-                    <time datetime="2026-03-28">2026-03-28</time>
-                    <span class="item-title">关于举办“华为杯”第九届中国研究生创“芯”大赛的通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            <article class="notice-item" data-url="https://graduate.cqu.edu.cn/info/1394/18970.htm" data-title="2026年春季学期智慧树在线开放课程研究生开课通知" data-source="graduate" data-date="2026-03-19">
-                <button class="icon-btn favorite-btn" type="button" aria-label="收藏通知" title="收藏通知" data-action="favorite">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6L7.1 19l.9-5.5-4-3.9 5.5-.8L12 3.8z"/></svg>
-                </button>
-                <a class="item-link" href="https://graduate.cqu.edu.cn/info/1394/18970.htm" target="_blank" rel="noopener" data-url="https://graduate.cqu.edu.cn/info/1394/18970.htm" data-title="2026年春季学期智慧树在线开放课程研究生开课通知" data-source="graduate" data-date="2026-03-19">
-                    <time datetime="2026-03-19">2026-03-19</time>
-                    <span class="item-title">2026年春季学期智慧树在线开放课程研究生开课通知</span>
-                    <span class="state-badge read-state" role="button" tabindex="0" data-action="read-toggle" aria-label="切换已读状态">未读</span>
-                    <span class="state-badge new-state">新</span>
-                    <svg class="item-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-                </a>
-            </article>
-            </div>
-        </section>
-  <footer>
-    <p>数据来源：重庆大学各官方网站 · 自动抓取仅供参考</p>
-    <p>如需重新抓取数据，请双击桌面「重大通知刷新」快捷方式</p>
-  </footer>
-</div>
-<div class="toast" id="toast"></div>
+  <footer class="page-footer">通知来自重庆大学公开页面；收藏与已读状态仅保存在本机。</footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
+window.CquSearch = (function () {
+  'use strict';
+  var cfg = null;
+  var inputEl = null;
+
+  function norm(s) {
+    return (s || '').toLowerCase().replace(/ü/g, 'v').replace(/\s+/g, ' ').trim();
+  }
+  function tokenize(q) {
+    return norm(q).split(' ').filter(Boolean);
+  }
+
+  function pyKeys(attr, alignLen) {
+    // attr -> [{full, init, offs|null}]；alignLen 不匹配时返回 []（放弃对齐高亮）
+    if (!attr) return [];
+    var parts = attr.split(' ');
+    var aligned = alignLen === undefined || parts.length === alignLen;
+    if (alignLen !== undefined && !aligned) return [];
+    var sylls = parts.map(function (p) { return p.split('|'); });
+    var keys = [];
+    function addKey(overrideIndex, overrideValue) {
+      var full = '', init = '', offs = alignLen === undefined ? null : [];
+      for (var j = 0; j < sylls.length; j++) {
+        var syl = j === overrideIndex ? sylls[j][overrideValue] : sylls[j][0];
+        if (offs) for (var k = 0; k < syl.length; k++) offs.push(j);
+        full += syl;
+        init += syl.charAt(0);
+      }
+      keys.push({ full: full, init: init, offs: offs });
+    }
+    addKey(-1, 0);
+    // 每个多音字分别建立备选索引，避免不同位置的备选读音被错误地绑定在一起。
+    for (var i = 0; i < sylls.length && keys.length < 24; i++) {
+      for (var v = 1; v < sylls[i].length && keys.length < 24; v++) addKey(i, v);
+    }
+    return keys;
+  }
+
+  function buildEntry(item) {
+    var title = item.dataset.title || '';
+    var chars = Array.from(title);
+    var entry = { text: ' ' + norm(cfg.text(item)) + ' ', chars: chars, keys: [] };
+    entry.keys = pyKeys(item.dataset.py || '', chars.length)
+      .concat(pyKeys(item.dataset.spy || ''));
+    return entry;
+  }
+  function entryOf(item) {
+    if (!item._cqs) item._cqs = buildEntry(item);
+    return item._cqs;
+  }
+
+  function tokenRanges(entry, tok) {
+    // 返回 null=未命中；[]=命中但不在标题上（来源/日期等）；[[a,b),...]=标题命中范围
+    var ranges = [];
+    var found = false;
+    var lowerTitle = entry.chars.join('').toLowerCase();
+    var idx = lowerTitle.indexOf(tok);
+    while (idx !== -1) {
+      ranges.push([idx, idx + tok.length]);
+      idx = lowerTitle.indexOf(tok, idx + 1);
+    }
+    for (var k = 0; k < entry.keys.length; k++) {
+      var key = entry.keys[k];
+      if (!key.offs) {
+        if (key.full.indexOf(tok) !== -1 || key.init.indexOf(tok) !== -1) found = true;
+        continue;
+      }
+      var p = key.full.indexOf(tok);
+      while (p !== -1) {
+        ranges.push([key.offs[p], key.offs[p + tok.length - 1] + 1]);
+        p = key.full.indexOf(tok, p + 1);
+      }
+      p = key.init.indexOf(tok);
+      while (p !== -1) {
+        ranges.push([p, p + tok.length]);
+        p = key.init.indexOf(tok, p + 1);
+      }
+    }
+    if (ranges.length) return ranges;
+    if (found || entry.text.indexOf(tok) !== -1) return [];
+    return null;
+  }
+
+  function mergeRanges(ranges) {
+    ranges.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    var out = [];
+    for (var i = 0; i < ranges.length; i++) {
+      var r = ranges[i];
+      if (out.length && r[0] <= out[out.length - 1][1]) {
+        if (r[1] > out[out.length - 1][1]) out[out.length - 1][1] = r[1];
+      } else out.push([r[0], r[1]]);
+    }
+    return out;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function paintRanges(el, chars, ranges) {
+    if (!el) return;
+    if (!ranges.length) { el.textContent = chars.join(''); return; }
+    var html = '', pos = 0;
+    for (var i = 0; i < ranges.length; i++) {
+      html += escapeHtml(chars.slice(pos, ranges[i][0]).join(''));
+      html += '<mark class="hl">' + escapeHtml(chars.slice(ranges[i][0], ranges[i][1]).join('')) + '</mark>';
+      pos = ranges[i][1];
+    }
+    html += escapeHtml(chars.slice(pos).join(''));
+    el.innerHTML = html;
+  }
+
+  function plainRanges(text, tokens) {
+    var lower = text.toLowerCase(), out = [];
+    for (var t = 0; t < tokens.length; t++) {
+      var idx = lower.indexOf(tokens[t]);
+      while (idx !== -1) {
+        out.push([idx, idx + tokens[t].length]);
+        idx = lower.indexOf(tokens[t], idx + 1);
+      }
+    }
+    return out;
+  }
+
+  function apply() {
+    if (!cfg) return 0;
+    var tokens = tokenize(inputEl ? inputEl.value : '');
+    var visible = 0;
+    var list = cfg.items();
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      var ok = cfg.pass ? cfg.pass(item) : true;
+      var titleRanges = [];
+      if (ok && tokens.length) {
+        var entry = entryOf(item);
+        for (var t = 0; t < tokens.length && ok; t++) {
+          var r = tokenRanges(entry, tokens[t]);
+          if (r === null) ok = false;
+          else titleRanges = titleRanges.concat(r);
+        }
+      }
+      item.classList.toggle('hidden', !ok);
+      if (ok) visible++;
+      for (var h = 0; h < (cfg.hl || []).length; h++) {
+        var target = cfg.hl[h];
+        var el = target.el(item);
+        if (!el) continue;
+        if (target.py) {
+          paintRanges(el, entryOf(item).chars, ok && tokens.length ? mergeRanges(titleRanges) : []);
+        } else {
+          var text = target.text(item);
+          var rr = ok && tokens.length ? mergeRanges(plainRanges(text, tokens)) : [];
+          paintRanges(el, Array.from(text), rr);
+        }
+      }
+    }
+    if (cfg.after) cfg.after(visible, tokens.join(' '));
+    return visible;
+  }
+
+  function reset() {
+    if (inputEl) inputEl.value = '';
+    if (cfg && cfg.onReset) cfg.onReset();
+    apply();
+    if (inputEl) inputEl.focus();
+  }
+
+  var timer = null;
+  function debounced() {
+    clearTimeout(timer);
+    timer = setTimeout(apply, 120);
+  }
+
+  function install(options) {
+    cfg = options;
+    inputEl = document.querySelector(options.input || '#searchInput');
+    if (inputEl) {
+      inputEl.addEventListener('input', debounced);
+      inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { inputEl.value = ''; apply(); }
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+        e.preventDefault();
+        if (inputEl) inputEl.focus();
+      }
+    });
+    return apply;
+  }
+
+  return { install: install, apply: apply, reset: reset, _norm: norm, _tokenize: tokenize };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  function configurePageLinks() {
+    document.querySelectorAll('[data-page-target][data-service-port]').forEach(function(link) {
+      if (location.protocol === 'file:') {
+        link.href = link.dataset.pageTarget === 'notices' ? 'index.html' : 'news.html';
+      } else {
+        link.href = location.protocol + '//' + location.hostname + ':' + link.dataset.servicePort + '/';
+      }
+    });
+  }
+  function sourceFilter() { return document.getElementById('sourceFilter'); }
+  function syncSourceIndex() {
+    var select = sourceFilter();
+    if (!select) return;
+    document.querySelectorAll('[data-source-target]').forEach(function(button) {
+      button.classList.toggle('active', button.dataset.sourceTarget === select.value);
+      button.setAttribute('aria-pressed', button.dataset.sourceTarget === select.value ? 'true' : 'false');
+    });
+  }
+  document.addEventListener('click', function(event) {
+    var source = event.target.closest('[data-source-target]');
+    if (source) {
+      var select = sourceFilter();
+      if (select) {
+        select.value = source.dataset.sourceTarget;
+        select.dispatchEvent(new Event('change', { bubbles:true }));
+        syncSourceIndex();
+      }
+      return;
+    }
+    var action = event.target.closest('[data-action]');
+    if (!action) return;
+    if (action.dataset.action === 'clear-filters' && window.CquSearch) CquSearch.reset();
+    if (action.dataset.action === 'refresh' && typeof window.doRefresh === 'function') window.doRefresh();
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    configurePageLinks();
+    syncSourceIndex();
+    var select = sourceFilter();
+    if (select) select.addEventListener('change', syncSourceIndex);
+  });
+  window.CquShell = { syncSourceIndex:syncSourceIndex };
+})();
+</script>
+<script>
+(function() {
+  'use strict';
   var STORAGE_KEYS = {
-    favorites: 'cqu_notice_favorites',
-    read: 'cqu_notice_read',
-    seen: 'cqu_notice_seen_urls'
+    favorites:'cqu_notice_favorites',
+    read:'cqu_notice_read',
+    seen:'cqu_notice_seen_urls'
   };
   var activeStatus = 'all';
-
+  var hadSeen=false,newUrls=new Set();
   function readSet(key) {
+    try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); }
+    catch (error) { return new Set(); }
+  }
+  function writeSet(key,set) {
+    try { localStorage.setItem(key,JSON.stringify(Array.from(set))); }
+    catch (error) {}
+  }
+  function showToast(message) {
+    var toast=document.getElementById('toast');
+    toast.textContent=message; toast.className='toast show';
+    setTimeout(function(){ toast.className='toast'; },2200);
+  }
+  window.doRefresh = async function() {
+    if (location.protocol === 'file:') { showToast('请从本地服务打开后刷新'); return; }
+    var button=document.getElementById('refreshButton');
+    button.disabled=true; button.setAttribute('aria-busy','true'); showToast('正在刷新通知');
     try {
-      var raw = localStorage.getItem(key);
-      return new Set(raw ? JSON.parse(raw) : []);
-    } catch (err) {
-      return new Set();
-    }
-  }
-
-  function writeSet(key, set) {
-    localStorage.setItem(key, JSON.stringify(Array.from(set)));
-  }
-
-  function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg; t.className = 'toast show';
-    setTimeout(function(){ t.className = 'toast'; }, 2500);
-  }
-
-  function scrollToTop() {
-    window.scrollTo({ top:0, behavior:'smooth' });
-    return false;
-  }
-
-  async function doRefresh() {
-    if (location.protocol === 'file:') {
-      showToast('请用桌面快捷方式打开，页面刷新按钮才能重新抓取数据');
-      return;
-    }
-    showToast('正在重新抓取通知…');
-    try {
-      var response = await fetch('/refresh', { method: 'POST', cache: 'no-store' });
-      var data = await response.json();
+      var response=await fetch('/refresh',{method:'POST',cache:'no-store'});
+      var data=await response.json();
       if (!response.ok || !data.ok) throw new Error(data.message || '刷新失败');
-      showToast('刷新完成，正在更新页面…');
-      setTimeout(function(){ location.reload(); }, 500);
-    } catch (err) {
-      showToast(err.message || '刷新失败，请稍后重试');
-    }
+      showToast('刷新完成'); setTimeout(function(){ location.reload(); },350);
+    } catch (error) { showToast(error.message || '刷新失败'); }
+    finally { button.disabled=false; button.removeAttribute('aria-busy'); }
+  };
+  function items() { return Array.prototype.slice.call(document.querySelectorAll('.notice-item')); }
+  function syncItem(item,favorites,read) {
+    var url=item.dataset.url;
+    var favorite=favorites.has(url), isRead=read.has(url), isNew=newUrls.has(url);
+    item.classList.toggle('is-favorite',favorite);
+    item.classList.toggle('is-read',isRead);
+    item.classList.toggle('is-new',isNew);
+    var favoriteButton=item.querySelector('[data-action="favorite"]');
+    var readButton=item.querySelector('[data-action="read-toggle"]');
+    favoriteButton.setAttribute('aria-pressed',favorite?'true':'false');
+    favoriteButton.setAttribute('aria-label',favorite?'取消收藏通知':'收藏通知');
+    favoriteButton.title=favorite?'取消收藏通知':'收藏通知';
+    readButton.textContent=isRead?'已读':'未读';
+    readButton.setAttribute('aria-pressed',isRead?'true':'false');
+    readButton.setAttribute('aria-label',isRead?'标为未读':'标为已读');
   }
-
-  function getItems() {
-    return Array.prototype.slice.call(document.querySelectorAll('.notice-item'));
-  }
-
-  function applyItemState(item, favorites, read, seen) {
-    var url = item.dataset.url;
-    var isFavorite = favorites.has(url);
-    var isRead = read.has(url);
-    var isNew = seen.size > 0 && !seen.has(url);
-    item.classList.toggle('is-favorite', isFavorite);
-    item.classList.toggle('is-read', isRead);
-    item.classList.toggle('is-new', isNew);
-    var favoriteBtn = item.querySelector('.favorite-btn');
-    var readState = item.querySelector('.read-state');
-    if (favoriteBtn) {
-      favoriteBtn.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
-      favoriteBtn.setAttribute('aria-label', isFavorite ? '取消收藏通知' : '收藏通知');
-      favoriteBtn.title = isFavorite ? '取消收藏通知' : '收藏通知';
-    }
-    if (readState) readState.textContent = isRead ? '已读' : '未读';
-  }
-
   function syncState() {
-    var favorites = readSet(STORAGE_KEYS.favorites);
-    var read = readSet(STORAGE_KEYS.read);
-    var seen = readSet(STORAGE_KEYS.seen);
-    var currentUrls = new Set();
-    getItems().forEach(function(item) {
-      currentUrls.add(item.dataset.url);
-      applyItemState(item, favorites, read, seen);
+    var favorites=readSet(STORAGE_KEYS.favorites), read=readSet(STORAGE_KEYS.read);
+    items().forEach(function(item){ syncItem(item,favorites,read); });
+  }
+  function initializeNewState() {
+    var seen=readSet(STORAGE_KEYS.seen); hadSeen=seen.size>0;
+    items().forEach(function(item){ if(hadSeen&&!seen.has(item.dataset.url)) newUrls.add(item.dataset.url); });
+    items().forEach(function(item){ seen.add(item.dataset.url); }); writeSet(STORAGE_KEYS.seen,seen);
+  }
+  function syncStatusButtons() {
+    document.querySelectorAll('[data-filter]').forEach(function(button){var active=button.dataset.filter===activeStatus;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false');});
+  }
+  function applyFilters() { CquSearch.apply(); }
+  function afterSearch(visible,query) {
+    document.querySelectorAll('.notice-group').forEach(function(group){
+      var shown=group.querySelectorAll('.notice-item:not(.hidden)').length;
+      group.classList.toggle('hidden',shown===0);
+      var count=group.querySelector('.group-count'); if(count) count.textContent=shown+' 条';
     });
-    currentUrls.forEach(function(url) { seen.add(url); });
-    writeSet(STORAGE_KEYS.seen, seen);
+    var line='当前显示 <strong>'+visible+'</strong> 条通知';
+    if(query) line+='（搜索：'+query.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'）';
+    document.getElementById('resultLine').innerHTML=line;
+    document.getElementById('emptyResults').classList.toggle('show',visible===0);
+    var select=document.getElementById('sourceFilter');
+    document.getElementById('indexState').textContent='当前查看 '+select.options[select.selectedIndex].text;
   }
-
-  function applyFilters() {
-    var query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-    var source = document.getElementById('sourceFilter').value;
-    var visibleCount = 0;
-    document.querySelectorAll('.card').forEach(function(card) {
-      var cardVisible = false;
-      var cardVisibleCount = 0;
-      card.querySelectorAll('.notice-item').forEach(function(item) {
-        var matchesText = !query || (item.dataset.title || '').toLowerCase().indexOf(query) !== -1;
-        var matchesSource = source === 'all' || item.dataset.source === source;
-        var matchesStatus =
-          activeStatus === 'all' ||
-          (activeStatus === 'new' && item.classList.contains('is-new')) ||
-          (activeStatus === 'favorite' && item.classList.contains('is-favorite')) ||
-          (activeStatus === 'unread' && !item.classList.contains('is-read'));
-        var visible = matchesText && matchesSource && matchesStatus;
-        item.classList.toggle('hidden', !visible);
-        if (visible) {
-          visibleCount += 1;
-          cardVisibleCount += 1;
-          cardVisible = true;
-        }
-      });
-      var hasItems = card.querySelector('.notice-item') !== null;
-      card.classList.toggle('hidden', hasItems && !cardVisible);
-      var count = card.querySelector('.card-count');
-      if (count && hasItems) count.textContent = cardVisibleCount + ' 条';
+  function toggleRead(item) {
+    var read=readSet(STORAGE_KEYS.read), url=item.dataset.url;
+    if(read.has(url)) { read.delete(url); showToast('已标为未读'); }
+    else { read.add(url); showToast('已标为已读'); }
+    writeSet(STORAGE_KEYS.read,read); syncState(); applyFilters();
+  }
+  window.markAllRead=function() {
+    var read=readSet(STORAGE_KEYS.read); items().forEach(function(item){ read.add(item.dataset.url); });
+    writeSet(STORAGE_KEYS.read,read); syncState(); applyFilters(); showToast('当前通知已全部标为已读');
+  };
+  document.addEventListener('click',function(event){
+    var favoriteButton=event.target.closest('[data-action="favorite"]');
+    if(favoriteButton) {
+      var item=favoriteButton.closest('.notice-item'), favorites=readSet(STORAGE_KEYS.favorites), url=item.dataset.url;
+      if(favorites.has(url)) { favorites.delete(url); showToast('已取消收藏'); }
+      else { favorites.add(url); showToast('已收藏'); }
+      writeSet(STORAGE_KEYS.favorites,favorites); syncState(); applyFilters(); return;
+    }
+    var readButton=event.target.closest('[data-action="read-toggle"]');
+    if(readButton) { toggleRead(readButton.closest('.notice-item')); return; }
+    var link=event.target.closest('.item-link');
+    if(link) { var read=readSet(STORAGE_KEYS.read); read.add(link.closest('.notice-item').dataset.url); writeSet(STORAGE_KEYS.read,read); }
+  });
+  document.addEventListener('DOMContentLoaded',function(){
+    CquSearch.install({
+      input:'#searchInput', items:items,
+      text:function(item){ return (item.dataset.title||'')+' '+(item.dataset.sname||'')+' '+(item.dataset.date||''); },
+      pass:function(item){
+        var source=document.getElementById('sourceFilter').value;
+        return (source==='all'||item.dataset.source===source) &&
+          (activeStatus==='all'||(activeStatus==='new'&&item.classList.contains('is-new'))||
+           (activeStatus==='favorite'&&item.classList.contains('is-favorite'))||
+           (activeStatus==='unread'&&!item.classList.contains('is-read')));
+      },
+      hl:[{el:function(item){return item.querySelector('.item-title');},py:true}],
+      after:afterSearch,
+      onReset:function(){
+        document.getElementById('sourceFilter').value='all'; activeStatus='all';
+        syncStatusButtons();
+        if(window.CquShell) CquShell.syncSourceIndex();
+      }
     });
-    document.getElementById('resultLine').innerHTML = '当前显示 <strong>' + visibleCount + '</strong> 条通知';
-    document.getElementById('emptyResults').classList.toggle('show', visibleCount === 0);
-  }
-
-  function markAllRead() {
-    var read = readSet(STORAGE_KEYS.read);
-    getItems().forEach(function(item) { read.add(item.dataset.url); });
-    writeSet(STORAGE_KEYS.read, read);
-    syncState();
-    applyFilters();
-    showToast('已将当前页面通知标为已读');
-  }
-
-  function toggleReadState(item) {
-    var read = readSet(STORAGE_KEYS.read);
-    var url = item.dataset.url;
-    if (read.has(url)) {
-      read.delete(url);
-      showToast('已标为未读');
-    } else {
-      read.add(url);
-      showToast('已标为已读');
-    }
-    writeSet(STORAGE_KEYS.read, read);
-    syncState();
-    applyFilters();
-  }
-
-  document.addEventListener('click', function(event) {
-    var favoriteBtn = event.target.closest('[data-action="favorite"]');
-    if (favoriteBtn) {
-      event.preventDefault();
-      event.stopPropagation();
-      var item = favoriteBtn.closest('.notice-item');
-      var favorites = readSet(STORAGE_KEYS.favorites);
-      if (favorites.has(item.dataset.url)) {
-        favorites.delete(item.dataset.url);
-        showToast('已取消收藏');
-      } else {
-        favorites.add(item.dataset.url);
-        showToast('已收藏');
-      }
-      writeSet(STORAGE_KEYS.favorites, favorites);
-      syncState();
-      applyFilters();
-      return;
-    }
-    var readToggle = event.target.closest('[data-action="read-toggle"]');
-    if (readToggle) {
-      event.preventDefault();
-      event.stopPropagation();
-      var readItem = readToggle.closest('.notice-item');
-      if (readItem) toggleReadState(readItem);
-      return;
-    }
-    var link = event.target.closest('.item-link');
-    if (link) {
-      var row = link.closest('.notice-item');
-      if (row) {
-        var read = readSet(STORAGE_KEYS.read);
-        read.add(row.dataset.url);
-        writeSet(STORAGE_KEYS.read, read);
-        syncState();
-        applyFilters();
-      }
-    }
-  });
-
-  document.addEventListener('keydown', function(event) {
-    var readToggle = event.target.closest('[data-action="read-toggle"]');
-    if (!readToggle || (event.key !== 'Enter' && event.key !== ' ')) return;
-    event.preventDefault();
-    var item = readToggle.closest('.notice-item');
-    if (item) toggleReadState(item);
-  });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    syncState();
-    applyFilters();
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-    document.getElementById('sourceFilter').addEventListener('change', applyFilters);
-    document.querySelectorAll('.seg-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.seg-btn').forEach(function(item) { item.classList.remove('active'); });
-        btn.classList.add('active');
-        activeStatus = btn.dataset.filter;
-        applyFilters();
+    document.getElementById('sourceFilter').addEventListener('change',applyFilters);
+    document.querySelectorAll('[data-filter]').forEach(function(button){
+      button.addEventListener('click',function(){
+        activeStatus=button.dataset.filter; syncStatusButtons(); applyFilters();
       });
     });
+    initializeNewState();
+    syncState();
+    applyFilters();
   });
-
-  (function() {
-    var meta = document.getElementById('updateMeta');
-    if (!meta) return;
-    var m = meta.textContent.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
-    if (!m) return;
-    var updated = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
-    var diff = Math.floor((Date.now() - updated) / 60000);
-    var rel = '';
-    if (diff < 1) rel = '刚刚更新';
-    else if (diff < 60) rel = diff + ' 分钟前更新';
-    else if (diff < 1440) rel = Math.floor(diff/60) + ' 小时前更新';
-    else rel = Math.floor(diff/1440) + ' 天前更新';
-    meta.textContent = '更新于 ' + m[1]+'-'+m[2]+'-'+m[3]+' '+m[4]+':'+m[5]+' (' + rel + ') · 共 ' + meta.textContent.match(/共 (\d+)/)[1] + ' 条通知';
-  })();
+})();
 </script>
 </body>
 </html>

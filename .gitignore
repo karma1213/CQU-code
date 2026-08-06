@@ -1,13 +1,18 @@
 __pycache__/
 *.py[cod]
+.venv/
 
 .claude/
 .superpowers/
 
 tools/
+diag/
 *.log
 *.err.log
 *.out.log
+finish-log.txt
+finish-search-refactor.bat
+*.tmp
 *.zip
 
 page_analysis.txt

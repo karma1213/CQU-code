@@ -1,15 +1,22 @@
 @echo off
-chcp 65001 >nul
-echo 正在抓取重庆大学通知公告...
-echo ----------------------------------------
+setlocal
+call "%~dp0_env.bat"
 
-"C:\Users\karma\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" "D:\Program Files\cherry\DS Agent\cqu_crawler.py"
+if not defined PY (
+    echo No Python found. Run install-cqu-code.bat first.
+    pause
+    exit /b 1
+)
 
-echo ----------------------------------------
-if %ERRORLEVEL% equ 0 (
-    echo 抓取完成！正在打开页面...
-    start "" "D:\Program Files\cherry\DS Agent\index.html"
+"%PY%" %PY_ARGS% "%ROOT%\cqu_crawler.py"
+set "RC=%ERRORLEVEL%"
+
+if "%RC%"=="0" (
+    start "" "%ROOT%\index.html"
 ) else (
-    echo 抓取出错，请检查网络连接或重试
+    echo.
+    echo Crawler failed with exit code %RC%.
+    echo Run diagnose.bat to find out why.
     pause
 )
+endlocal & exit /b %RC%

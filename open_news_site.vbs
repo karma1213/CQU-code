@@ -1,16 +1,37 @@
 Option Explicit
 
-Dim shell, baseDir, pythonExe, server, command, url
+' Starts both local services from this script's folder, then opens news.
+' Keep this file pure ASCII because WSH uses the system ANSI codepage.
+
+Dim shell, fso, baseDir, pythonExe, noticeServer, newsServer
+Dim noticeCommand, newsCommand, url
 
 Set shell = CreateObject("WScript.Shell")
-baseDir = "D:\Program Files\cherry\DS Agent"
-pythonExe = "C:\Users\karma\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
-server = baseDir & "\news_server.py"
+Set fso = CreateObject("Scripting.FileSystemObject")
+
+baseDir = fso.GetParentFolderName(WScript.ScriptFullName)
+noticeServer = fso.BuildPath(baseDir, "notice_server.py")
+newsServer = fso.BuildPath(baseDir, "news_server.py")
 url = "http://127.0.0.1:8766/"
 
-command = """" & pythonExe & """ """ & server & """"
+pythonExe = fso.BuildPath(baseDir, ".venv\Scripts\pythonw.exe")
+If Not fso.FileExists(pythonExe) Then
+    pythonExe = fso.BuildPath(baseDir, ".venv\Scripts\python.exe")
+End If
+If Not fso.FileExists(pythonExe) Then
+    pythonExe = "pythonw.exe"
+End If
+
+If Not fso.FileExists(noticeServer) Or Not fso.FileExists(newsServer) Then
+    MsgBox "notice_server.py or news_server.py not found in:" & vbCrLf & baseDir, vbCritical, "CQU Notice Hub"
+    WScript.Quit 1
+End If
+
+noticeCommand = """" & pythonExe & """ """ & noticeServer & """"
+newsCommand = """" & pythonExe & """ """ & newsServer & """"
 shell.CurrentDirectory = baseDir
-shell.Run command, 0, False
+shell.Run noticeCommand, 0, False
+shell.Run newsCommand, 0, False
 
 WScript.Sleep 1500
 shell.Run url, 1, False

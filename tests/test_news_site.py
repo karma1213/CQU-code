@@ -1,6 +1,9 @@
 import importlib.util
 import os
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,6 +17,63 @@ def load_module(filename, name):
 
 
 class NewsSiteTest(unittest.TestCase):
+    def test_rss_summary_strips_embedded_html(self):
+        crawler = load_module("news_crawler.py", "news_crawler_rss_summary_test")
+        source = {
+            "id": "rss",
+            "name": "RSS",
+            "category": "国内",
+            "url": "https://example.test/feed.xml",
+        }
+        payload = """<rss><channel><item>
+          <title>这是一个足够长的新闻标题</title>
+          <link>https://example.test/news/1</link>
+          <description>&lt;p&gt;正文 &lt;b&gt;摘要&lt;/b&gt;&lt;/p&gt;</description>
+          <pubDate>Tue, 04 Aug 2026 22:31:00 +0800</pubDate>
+        </item></channel></rss>"""
+        with mock.patch.object(crawler, "fetch_text", return_value=payload):
+            items = crawler.fetch_rss(source)
+        self.assertEqual(items[0].summary, "正文 摘要")
+
+    def test_atom_feed_supports_namespaces_and_iso_dates(self):
+        crawler = load_module("news_crawler.py", "news_crawler_atom_test")
+        source = {
+            "id": "atom",
+            "name": "Atom",
+            "category": "国内",
+            "url": "https://example.test/feed.atom",
+        }
+        payload = """<?xml version="1.0"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <entry>
+            <title>Campus announcement</title>
+            <link href="https://example.test/news/2026/08/07/1.html" />
+            <summary>&lt;p&gt;Summary&lt;/p&gt;</summary>
+            <updated>2026-08-07T01:30:00Z</updated>
+          </entry>
+        </feed>"""
+        with mock.patch.object(crawler, "fetch_text", return_value=payload):
+            items = crawler.fetch_rss(source)
+        self.assertEqual(items[0].url, "https://example.test/news/2026/08/07/1.html")
+        self.assertEqual(items[0].date, "2026-08-07 09:30")
+
+    def test_parse_date_rejects_navigation_text(self):
+        crawler = load_module("news_crawler.py", "news_crawler_date_test")
+        self.assertEqual(crawler.parse_date("English Español Français"), "")
+
+    def test_page_parser_skips_language_navigation(self):
+        crawler = load_module("news_crawler.py", "news_crawler_language_nav_test")
+        source = {
+            "id": "xinhua",
+            "name": "新华网",
+            "category": "国内",
+            "url": "https://www.news.cn/",
+            "base": "https://www.news.cn/",
+        }
+        markup = '<nav><a href="https://portuguese.news.cn/index.htm">Português</a></nav>'
+        with mock.patch.object(crawler, "fetch_text", return_value=markup):
+            self.assertEqual(crawler.fetch_page_source(source), [])
+
     def test_crawler_generates_required_controls_and_state_keys(self):
         crawler = load_module("news_crawler.py", "news_crawler")
         items = [
@@ -92,6 +152,50 @@ class NewsSiteTest(unittest.TestCase):
         self.assertEqual(server.PORT, 8766)
         self.assertEqual(os.path.basename(server.OUTPUT_FILE), "news.html")
         self.assertTrue(hasattr(server, "NewsHandler"))
+
+    def test_page_parser_rejects_disguised_source_domain(self):
+        crawler = load_module("news_crawler.py", "news_crawler_domain_test")
+        source = {
+            "id": "xinhua",
+            "name": "新华网",
+            "category": "国内",
+            "url": "https://www.news.cn/",
+            "base": "https://www.news.cn/",
+        }
+        markup = '<a href="https://evil.test/article?next=news.cn">这是一个足够长的新闻标题</a>'
+        with mock.patch.object(crawler, "fetch_text", return_value=markup):
+            self.assertEqual(crawler.fetch_page_source(source), [])
+
+    def test_generate_html_drops_unsafe_url(self):
+        crawler = load_module("news_crawler.py", "news_crawler_unsafe_test")
+        item = crawler.NewsItem("x", "来源", "国内", "新闻标题", "javascript:alert(1)", "", "", "", [])
+        html = crawler.generate_html([item], [], crawler.datetime.now(crawler.CST))
+        self.assertNotIn("javascript:", html)
+        self.assertIn("<strong>0</strong>", html)
+
+    def test_main_preserves_previous_page_when_all_sources_fail(self):
+        crawler = load_module("news_crawler.py", "news_crawler_preserve_test")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory, "news.html")
+            output.write_text("last known good", encoding="utf-8")
+            with (
+                mock.patch.object(crawler, "OUTPUT_FILE", str(output)),
+                mock.patch.object(crawler, "crawl_all", return_value=([], [{"source": "x", "message": "offline"}])),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "已保留上一版页面"):
+                    crawler.main()
+            self.assertEqual(output.read_text(encoding="utf-8"), "last known good")
+
+    def test_main_bootstraps_empty_page_without_previous_output(self):
+        crawler = load_module("news_crawler.py", "news_crawler_bootstrap_test")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory, "news.html")
+            with (
+                mock.patch.object(crawler, "OUTPUT_FILE", str(output)),
+                mock.patch.object(crawler, "crawl_all", return_value=([], [])),
+            ):
+                crawler.main()
+            self.assertIn("暂无可用新闻数据", output.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

@@ -1,9 +1,12 @@
 @echo off
-chcp 65001 >nul
-echo 重庆大学通知公告爬虫 - 每日自动更新
-echo 开始时间: %date% %time%
+rem Scheduled-task entry point: crawl only, no browser.
+setlocal
+call "%~dp0_env.bat"
 
-"C:\Users\karma\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" "D:\Program Files\cherry\DS Agent\cqu_crawler.py"
+if not defined PY (
+    echo No Python found.
+    exit /b 1
+)
 
-echo 完成时间: %date% %time%
-echo.
+"%PY%" %PY_ARGS% "%ROOT%\cqu_crawler.py"
+endlocal & exit /b %ERRORLEVEL%
