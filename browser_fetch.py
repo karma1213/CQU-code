@@ -595,9 +595,8 @@ class BrowserSession:
         process = _launch_chrome(self.port, self.profile, self._identity_url)
         self.chrome_process = process
         self.owns_chrome = True
-        deadline = time.monotonic() + float(
-            os.environ.get("CQU_BROWSER_START_TIMEOUT", "25")
-        )
+        timeout = float(os.environ.get("CQU_BROWSER_START_TIMEOUT", "25"))
+        deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             if process.poll() is not None:
                 raise BrowserFetchError(
@@ -606,7 +605,9 @@ class BrowserSession:
             if _probe_owned_debug_port(self.port, self._identity_url):
                 return
             time.sleep(0.25)
-        raise BrowserFetchError(f"Chrome 调试端口 {self.port} 25 秒内未就绪")
+        raise BrowserFetchError(
+            f"Chrome 调试端口 {self.port} {timeout:g} 秒内未就绪"
+        )
 
     def _prewarm(self, urls) -> None:
         self.warmup_errors = {}
